@@ -1,7 +1,7 @@
 import 'package:brillianteducationproject/extension/navigator.dart';
 import 'package:brillianteducationproject/database/sqflite.dart';
 import 'package:brillianteducationproject/models/user_model.dart';
-import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
+import 'package:brillianteducationproject/view/siswa_main_screen.dart';
 import 'package:flutter/material.dart';
 
 class RegisterSiswaScreen extends StatefulWidget {
@@ -234,7 +234,7 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
                               content: Text('Registrasi berhasil!'),
                             ),
                           );
-                          context.pushAndRemoveAll(const TutorMainScreen());
+                          context.pushAndRemoveAll(const SiswaMainScreen());
                         }
                       } catch (e) {
                         if (context.mounted) {

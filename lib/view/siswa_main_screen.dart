@@ -1,22 +1,24 @@
-import 'package:brillianteducationproject/view/tutorview/kelas_tutor_screen.dart';
+import 'package:brillianteducationproject/view/search_siswa_screen.dart';
+import 'package:brillianteducationproject/view/kelas_siswa_screen.dart';
 import 'package:flutter/material.dart';
-import 'home_tutor_screen.dart';
-import 'profil_tutor_screen.dart';
+import 'home_siswa.dart';
+import 'profil_siswa_screen.dart';
 
-class TutorMainScreen extends StatefulWidget {
-  const TutorMainScreen({super.key});
+class SiswaMainScreen extends StatefulWidget {
+  const SiswaMainScreen({super.key});
 
   @override
-  State<TutorMainScreen> createState() => _TutorMainScreenState();
+  State<SiswaMainScreen> createState() => _SiswaMainScreenState();
 }
 
-class _TutorMainScreenState extends State<TutorMainScreen> {
+class _SiswaMainScreenState extends State<SiswaMainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
-    HomeTutorScreen(),
-    KelasTutorScreen(),
-    ProfilTutorScreen(),
+    HomeSiswaScreen(),
+    KelasSiswaScreen(),
+    SearchSiswaScreen(),
+    ProfilSiswaScreen(),
   ];
 
   @override
@@ -33,10 +35,11 @@ class _TutorMainScreenState extends State<TutorMainScreen> {
         },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: Color(0xFFB23AEE),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Kelas'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),

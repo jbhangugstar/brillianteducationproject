@@ -1,7 +1,7 @@
 import 'package:brillianteducationproject/extension/navigator.dart';
-import 'package:brillianteducationproject/view/registeroption_screen.dart';
 import 'package:brillianteducationproject/database/sqflite.dart';
-import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
+import 'package:brillianteducationproject/view/registersiswa_screen.dart';
+import 'package:brillianteducationproject/view/siswa_main_screen.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     if (user != null) {
                       if (context.mounted) {
-                        context.pushAndRemoveAll(const TutorMainScreen());
+                        context.pushAndRemoveAll(const SiswaMainScreen());
                       }
                     } else {
                       if (context.mounted) {
@@ -192,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    context.push(RegisteroptionScreen());
+                    context.push(RegisterSiswaScreen());
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
