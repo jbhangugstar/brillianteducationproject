@@ -13,53 +13,130 @@ class DBHelper {
           'CREATE TABLE user ( id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, password TEXT, role TEXT, nama TEXT)',
         );
 
-        // TABEL TUTOR
-        await db.execute(
-          'CREATE TABLE tutor ( id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, no_hp TEXT, mata_pelajaran TEXT, id_user INTEGER)',
-        );
+        // TABEL TUTOR - EXPANDED
+        await db.execute('''
+        CREATE TABLE tutor (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nama TEXT NOT NULL,
+          no_hp TEXT,
+          mata_pelajaran TEXT,
+          foto TEXT,
+          email TEXT,
+          deskripsi TEXT,
+          rating REAL,
+          jumlah_siswa INTEGER DEFAULT 0,
+          pendidikan TEXT,
+          pengalaman TEXT,
+          keahlian TEXT,
+          id_user INTEGER
+        )
+        ''');
 
-        // TABEL SISWA (DITAMBAHKAN)
+        // TABEL SISWA
         await db.execute(
           'CREATE TABLE siswa ( id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, email TEXT, password TEXT)',
         );
 
-        // TABEL KELAS (DITAMBAHKAN)
+        // TABEL KELAS - EXPANDED
         await db.execute('''
         CREATE TABLE kelas (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          nama_kelas TEXT,
+          nama_kelas TEXT NOT NULL,
           harga INTEGER,
           jadwal TEXT,
           tutor TEXT,
-          deskripsi TEXT
-          foto TEXT
+          deskripsi TEXT,
+          foto TEXT,
+          kategori TEXT,
+          durasi INTEGER,
+          tingkat_kesukaran TEXT,
+          id_tutor INTEGER,
+          jumlah_siswa INTEGER DEFAULT 0,
+          rating REAL,
+          status TEXT DEFAULT 'aktif',
+          tujuan_pembelajaran TEXT,
+          FOREIGN KEY(id_tutor) REFERENCES tutor(id)
+        )
+        ''');
+
+        // TABEL ENROLLMENT
+        await db.execute('''
+        CREATE TABLE enrollment (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          id_siswa INTEGER NOT NULL,
+          id_kelas INTEGER NOT NULL,
+          nama_siswa TEXT,
+          nama_kelas TEXT,
+          tanggal_daftar TEXT,
+          status TEXT DEFAULT 'aktif',
+          nilai_progress REAL DEFAULT 0,
+          FOREIGN KEY(id_siswa) REFERENCES siswa(id),
+          FOREIGN KEY(id_kelas) REFERENCES kelas(id)
         )
         ''');
       },
-      version: 8,
+      version: 9,
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 7) {
-          await db.execute(
-            'CREATE TABLE tutor ( id INTEGER PRIMARY KEY AUTOINCREMENT , nama TEXT, no_hp TEXT, mata_pelajaran TEXT)',
-          );
+          await db.execute('''
+          CREATE TABLE tutor (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nama TEXT NOT NULL,
+            no_hp TEXT,
+            mata_pelajaran TEXT,
+            foto TEXT,
+            email TEXT,
+            deskripsi TEXT,
+            rating REAL,
+            jumlah_siswa INTEGER DEFAULT 0,
+            pendidikan TEXT,
+            pengalaman TEXT,
+            keahlian TEXT,
+            id_user INTEGER
+          )
+          ''');
 
-          // TAMBAHAN TABEL SISWA
           await db.execute(
             'CREATE TABLE siswa ( id INTEGER PRIMARY KEY AUTOINCREMENT , nama TEXT, email TEXT, password TEXT)',
           );
         }
 
-        // TAMBAHAN TABEL KELAS
         if (oldVersion < 8) {
           await db.execute('''
           CREATE TABLE kelas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nama_kelas TEXT,
+            nama_kelas TEXT NOT NULL,
             harga INTEGER,
             jadwal TEXT,
             tutor TEXT,
             deskripsi TEXT,
-            foto TEXT
+            foto TEXT,
+            kategori TEXT,
+            durasi INTEGER,
+            tingkat_kesukaran TEXT,
+            id_tutor INTEGER,
+            jumlah_siswa INTEGER DEFAULT 0,
+            rating REAL,
+            status TEXT DEFAULT 'aktif',
+            tujuan_pembelajaran TEXT,
+            FOREIGN KEY(id_tutor) REFERENCES tutor(id)
+          )
+          ''');
+        }
+
+        if (oldVersion < 9) {
+          await db.execute('''
+          CREATE TABLE enrollment (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_siswa INTEGER NOT NULL,
+            id_kelas INTEGER NOT NULL,
+            nama_siswa TEXT,
+            nama_kelas TEXT,
+            tanggal_daftar TEXT,
+            status TEXT DEFAULT 'aktif',
+            nilai_progress REAL DEFAULT 0,
+            FOREIGN KEY(id_siswa) REFERENCES siswa(id),
+            FOREIGN KEY(id_kelas) REFERENCES kelas(id)
           )
           ''');
         }
@@ -95,5 +172,39 @@ class DBHelper {
   Future<List<Map<String, dynamic>>> getAllKelas() async {
     final dbs = await db();
     return await dbs.query('kelas');
+  }
+
+  // Get kelas by ID
+  Future<Map<String, dynamic>?> getKelasById(int id) async {
+    final dbs = await db();
+    final result = await dbs.query('kelas', where: 'id = ?', whereArgs: [id]);
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  // Get tutor by ID
+  Future<Map<String, dynamic>?> getTutorById(int id) async {
+    final dbs = await db();
+    final result = await dbs.query('tutor', where: 'id = ?', whereArgs: [id]);
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  // Get all students in a class
+  Future<List<Map<String, dynamic>>> getStudentsByKelas(int kelasId) async {
+    final dbs = await db();
+    return await dbs.query(
+      'enrollment',
+      where: 'id_kelas = ?',
+      whereArgs: [kelasId],
+    );
+  }
+
+  // Get all classes for a tutor
+  Future<List<Map<String, dynamic>>> getKelasByTutor(int tutorId) async {
+    final dbs = await db();
+    return await dbs.query(
+      'kelas',
+      where: 'id_tutor = ?',
+      whereArgs: [tutorId],
+    );
   }
 }

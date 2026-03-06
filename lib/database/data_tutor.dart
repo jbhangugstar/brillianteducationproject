@@ -3,7 +3,7 @@ import 'package:brillianteducationproject/models/tutor_model.dart';
 List<TutorModel> tutorList = [
   TutorModel(
     id: 1,
-    nama: "Bu Sarah Wijaya",
+    nama: "Bu Keishya Wijaya",
     noHp: "08123456789",
     mataaPelajaran: "Matematika",
     foto: "https://avatars.preply.com/i/logos/i/logos/avatar_facvevr7sw.jpg",
