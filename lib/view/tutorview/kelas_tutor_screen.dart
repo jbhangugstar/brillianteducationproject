@@ -1,3 +1,5 @@
+import 'package:brillianteducationproject/extension/navigator.dart';
+import 'package:brillianteducationproject/view/tutorview/buat_kelas_baru.dart';
 import 'package:flutter/material.dart';
 
 class KelasTutorScreen extends StatelessWidget {
@@ -60,7 +62,9 @@ class KelasTutorScreen extends StatelessWidget {
                           "Buat Kelas Baru",
                           style: TextStyle(color: Colors.white),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          context.push(BuatKelasBaruScreen());
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFFB23AEE),
                           padding: const EdgeInsets.symmetric(vertical: 14),

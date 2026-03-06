@@ -10,31 +10,46 @@ class HomeTutorScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 184, 193, 197),
         elevation: 0,
+        automaticallyImplyLeading: false, // ❌ hilangkan tombol back
         titleSpacing: 16,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const CircleAvatar(
+              radius: 20,
               backgroundImage: AssetImage("assets/images/tutor.jpg"),
             ),
-            const SizedBox(width: 10),
+
+            const SizedBox(width: 12),
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: const [
                 Text(
                   "Halo, Sarah",
-                  style: TextStyle(color: Colors.black, fontSize: 16),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
+
+                SizedBox(height: 2),
+
                 Text(
                   "PENDIDIK SENIOR",
                   style: TextStyle(
                     fontSize: 11,
                     color: Color.fromARGB(255, 48, 10, 185),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ],
         ),
+
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 16),

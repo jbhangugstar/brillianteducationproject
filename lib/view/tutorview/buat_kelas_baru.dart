@@ -1,7 +1,7 @@
 import 'package:brillianteducationproject/extension/navigator.dart';
 import 'package:brillianteducationproject/view/tutorview/buat_kelas_baru2.dart';
 import 'package:brillianteducationproject/view/tutorview/kelas_tutor_screen.dart';
-import 'package:brillianteducationproject/view/tutorview/profil_tutor_screen.dart';
+import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
 import 'package:flutter/material.dart';
 
 class BuatKelasBaruScreen extends StatelessWidget {
@@ -12,13 +12,13 @@ class BuatKelasBaruScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
       appBar: AppBar(
-        title: Text(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: const Text(
           "Buat Kelas Baru",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
       ),
 
       body: SingleChildScrollView(
@@ -210,7 +210,7 @@ class BuatKelasBaruScreen extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      context.push(KelasTutorScreen());
+                      context.push(TutorMainScreen());
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 15),

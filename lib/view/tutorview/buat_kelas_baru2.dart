@@ -12,7 +12,12 @@ class BuatKelasStep2Screen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const Icon(Icons.arrow_back, color: Colors.black),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            context.push(BuatKelasBaruScreen());
+          },
+        ),
         title: const Text(
           "Buat Kelas Baru",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
