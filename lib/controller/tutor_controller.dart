@@ -1,5 +1,5 @@
 import 'package:brillianteducationproject/models/tutor_model.dart';
-import 'package:brillianteducationproject/database/sqflite.dart';
+import 'package:brillianteducationproject/database/db_helper.dart';
 
 class TutorController {
   static Future<void> registerTutor(TutorModel tutor) async {

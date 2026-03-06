@@ -2,19 +2,21 @@ import 'package:brillianteducationproject/extension/navigator.dart';
 import 'package:brillianteducationproject/database/db_helper.dart';
 import 'package:brillianteducationproject/helper/role_helper.dart';
 import 'package:brillianteducationproject/models/user_model.dart';
-import 'package:brillianteducationproject/view/siswa_main_screen.dart';
+import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
 import 'package:flutter/material.dart';
 
-class RegisterSiswaScreen extends StatefulWidget {
-  const RegisterSiswaScreen({super.key});
+class RegistertutorScreen extends StatefulWidget {
+  const RegistertutorScreen({super.key});
 
   @override
-  State<RegisterSiswaScreen> createState() => _RegisterSiswaScreenState();
+  State<RegistertutorScreen> createState() => _RegistertutorScreenState();
 }
 
-class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
+class _RegistertutorScreenState extends State<RegistertutorScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController subjectController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
@@ -24,6 +26,8 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
   void dispose() {
     nameController.dispose();
     emailController.dispose();
+    phoneController.dispose();
+    subjectController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
@@ -58,7 +62,6 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
             colors: [Color.fromARGB(255, 220, 215, 223), Color(0xFFB23AEE)],
           ),
         ),
-
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -66,14 +69,14 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Bergabung sebagai siswa",
+                  "Bergabung sebagai tutor",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 8),
 
                 const Text(
-                  "Lengkapi data diri Anda untuk mulai belajar.",
+                  "Lengkapi data diri Anda untuk mulai mengajar.",
                   style: TextStyle(color: Colors.black54),
                 ),
 
@@ -225,7 +228,7 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
                       final user = UserModel(
                         email: emailController.text,
                         password: passwordController.text,
-                        role: RoleHelper.siswa,
+                        role: RoleHelper.tutor,
                         nama: nameController.text,
                       );
 
@@ -237,7 +240,7 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
                               content: Text('Registrasi berhasil!'),
                             ),
                           );
-                          context.pushAndRemoveAll(const SiswaMainScreen());
+                          context.pushAndRemoveAll(const TutorMainScreen());
                         }
                       } catch (e) {
                         if (context.mounted) {

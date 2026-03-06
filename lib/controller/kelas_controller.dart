@@ -1,4 +1,4 @@
-import 'package:brillianteducationproject/database/sqflite.dart';
+import 'package:brillianteducationproject/database/db_helper.dart';
 
 class KelasController {
   // CREATE KELAS

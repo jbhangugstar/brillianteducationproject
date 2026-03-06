@@ -1,7 +1,9 @@
 import 'package:brillianteducationproject/extension/navigator.dart';
-import 'package:brillianteducationproject/database/sqflite.dart';
-import 'package:brillianteducationproject/view/registersiswa_screen.dart';
+import 'package:brillianteducationproject/database/db_helper.dart';
+import 'package:brillianteducationproject/helper/role_helper.dart';
+import 'package:brillianteducationproject/view/register_option.dart';
 import 'package:brillianteducationproject/view/siswa_main_screen.dart';
+import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -12,10 +14,11 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController nameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+
   bool isVisibility = false;
+
   void visibilityOnOff() {
     isVisibility = !isVisibility;
     setState(() {});
@@ -41,28 +44,12 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              // Icon
-              CircleAvatar(
-                radius: 40,
-                backgroundColor: Colors.white,
-                child: Icon(Icons.school, size: 40, color: Colors.purple),
-              ),
+              const SizedBox(height: 60),
 
-              const SizedBox(height: 16),
-
-              // Judul
-              const Text(
-                "Brilliant Education",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-
-              const SizedBox(height: 8),
+              // Logo
+              Image.asset("assets/icons/logo_brilliant.png", height: 250),
 
               const Text(
                 "Your Dreams Matter",
@@ -72,31 +59,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 30),
 
               // Email
               TextFormField(
                 controller: emailController,
                 decoration: InputDecoration(
                   hintText: "Masukkan Email",
+                  labelText: "Email",
+                  prefixIcon: const Icon(Icons.email),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
                   ),
-                  errorStyle: TextStyle(
-                    color: const Color.fromARGB(255, 135, 34, 160),
-                  ),
-                  labelText: "Email",
-                  prefixIcon: Icon(Icons.email),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Email wajib diisi";
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 16),
@@ -107,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: !isVisibility,
                 decoration: InputDecoration(
                   hintText: "Password",
-                  prefixIcon: Icon(Icons.key),
+                  prefixIcon: const Icon(Icons.key),
                   suffixIcon: IconButton(
                     icon: Icon(
                       isVisibility ? Icons.visibility : Icons.visibility_off,
@@ -148,7 +126,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     if (user != null) {
                       if (context.mounted) {
-                        context.pushAndRemoveAll(const SiswaMainScreen());
+                        if (user.role == RoleHelper.siswa) {
+                          context.pushAndRemoveAll(const SiswaMainScreen());
+                        } else {
+                          context.pushAndRemoveAll(const TutorMainScreen());
+                        }
                       }
                     } else {
                       if (context.mounted) {
@@ -177,9 +159,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 30),
 
-              // Daftar
+              // Text daftar
               const Text(
                 "Belum punya akun? Daftar",
                 style: TextStyle(color: Colors.white),
@@ -187,12 +169,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 8),
 
+              // Tombol daftar
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    context.push(RegisterSiswaScreen());
+                    context.push(RegisteroptionScreen());
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,

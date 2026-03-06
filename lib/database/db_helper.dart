@@ -10,12 +10,12 @@ class DBHelper {
       onCreate: (db, version) async {
         // TABEL USER
         await db.execute(
-          'CREATE TABLE user ( id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, password TEXT)',
+          'CREATE TABLE user ( id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, password TEXT, role TEXT, nama TEXT)',
         );
 
         // TABEL TUTOR
         await db.execute(
-          'CREATE TABLE tutor ( id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, no_hp TEXT, mata_pelajaran TEXT)',
+          'CREATE TABLE tutor ( id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, no_hp TEXT, mata_pelajaran TEXT, id_user INTEGER)',
         );
 
         // TABEL SISWA (DITAMBAHKAN)

@@ -1,5 +1,5 @@
 import 'package:brillianteducationproject/models/siswa_model.dart';
-import 'package:brillianteducationproject/database/sqflite.dart';
+import 'package:brillianteducationproject/database/db_helper.dart';
 
 class SiswaController {
   static Future<void> registerSiswa(SiswaModel siswa) async {

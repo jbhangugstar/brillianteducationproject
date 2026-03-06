@@ -1,3 +1,6 @@
+import 'package:brillianteducationproject/extension/navigator.dart';
+import 'package:brillianteducationproject/view/login_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ProfilSiswaScreen extends StatelessWidget {
@@ -77,7 +80,12 @@ class ProfilSiswaScreen extends StatelessWidget {
                 ),
                 onPressed: () {},
                 icon: const Icon(Icons.edit),
-                label: const Text('Edit Profil'),
+                label: const Text(
+                  'Edit Profil',
+                  style: TextStyle(
+                    color: CupertinoColors.extraLightBackgroundGray,
+                  ),
+                ),
               ),
               const SizedBox(height: 15),
               ElevatedButton.icon(
@@ -91,7 +99,9 @@ class ProfilSiswaScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  context.pushAndRemoveAll(LoginScreen());
+                },
                 icon: const Icon(Icons.logout),
                 label: const Text('Logout'),
               ),

@@ -28,8 +28,8 @@ class HomeSiswaScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               Color.fromARGB(255, 199, 196, 201),
-              Color.fromARGB(255, 222, 216, 224),
-              Color.fromARGB(255, 224, 175, 222),
+              Color.fromARGB(255, 197, 84, 235),
+              Color.fromARGB(255, 214, 80, 210),
             ],
           ),
         ),
