@@ -1,5 +1,5 @@
-import 'package:brillianteducationproject/view/search_siswa_screen.dart';
-import 'package:brillianteducationproject/view/kelas_siswa_screen.dart';
+import 'package:brillianteducationproject/view/siswaview/jadwal_siswa.dart';
+import 'package:brillianteducationproject/view/siswaview/kelas_siswa_screen.dart';
 import 'package:flutter/material.dart';
 import 'home_siswa.dart';
 import 'profil_siswa_screen.dart';
@@ -17,7 +17,7 @@ class _SiswaMainScreenState extends State<SiswaMainScreen> {
   final List<Widget> _pages = const [
     HomeSiswaScreen(),
     KelasSiswaScreen(),
-    SearchSiswaScreen(),
+    JadwalSiswaScreen(),
     ProfilSiswaScreen(),
   ];
 
@@ -39,7 +39,10 @@ class _SiswaMainScreenState extends State<SiswaMainScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Kelas'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.schedule),
+            label: 'Jadwal Saya',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),

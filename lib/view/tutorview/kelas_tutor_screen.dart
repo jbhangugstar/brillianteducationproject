@@ -1,6 +1,7 @@
 import 'package:brillianteducationproject/extension/navigator.dart';
 import 'package:brillianteducationproject/view/tutorview/buat_kelas_baru.dart';
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
+import 'package:brillianteducationproject/models/kelas_model.dart';
 import 'package:brillianteducationproject/view/tutorview/manage_students_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +13,7 @@ class KelasTutorScreen extends StatefulWidget {
 }
 
 class _KelasTutorScreenState extends State<KelasTutorScreen> {
-  late Future<List<dynamic>> kelasFuture;
+  late Future<List<Kelas>> kelasFuture;
 
   @override
   void initState() {
@@ -47,7 +48,7 @@ class _KelasTutorScreenState extends State<KelasTutorScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          context.push(const BuatKelasBaruScreen()).then((_) {
+          context.push(BuatKelasBaruScreen()).then((_) {
             _refreshKelas();
           });
         },
@@ -55,7 +56,7 @@ class _KelasTutorScreenState extends State<KelasTutorScreen> {
         icon: const Icon(Icons.add),
         label: const Text("Kelas Baru"),
       ),
-      body: FutureBuilder<List<dynamic>>(
+      body: FutureBuilder<List<Kelas>>(
         future: kelasFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -182,14 +183,14 @@ class _KelasTutorScreenState extends State<KelasTutorScreen> {
                         padding: const EdgeInsets.only(bottom: 12),
                         child: kelasCard(
                           context: context,
-                          id: kelas['id'] ?? 0,
-                          title: kelas['nama_kelas'] ?? 'Kelas Tanpa Nama',
-                          price: 'Rp ${kelas['harga']}',
-                          schedule: kelas['jadwal'] ?? 'Jadwal Tidak Tersedia',
-                          students: '${kelas['jumlah_siswa'] ?? 0} siswa',
-                          kategori: kelas['kategori'],
-                          rating: kelas['rating'],
-                          status: kelas['status'] ?? 'aktif',
+                          id: kelas.id ?? 0,
+                          title: kelas.namaKelas,
+                          price: 'Rp ${kelas.harga}',
+                          schedule: kelas.jadwal,
+                          students: '${kelas.jumlahSiswa ?? 0} siswa',
+                          kategori: kelas.kategori,
+                          rating: kelas.rating,
+                          status: kelas.status ?? 'aktif',
                           onRefresh: _refreshKelas,
                         ),
                       );

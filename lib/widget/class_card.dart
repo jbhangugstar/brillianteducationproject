@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 class ClassCard extends StatelessWidget {
@@ -11,6 +12,7 @@ class ClassCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onBook;
   final String? kategori;
+  final String? foto;
 
   const ClassCard({
     Key? key,
@@ -24,6 +26,7 @@ class ClassCard extends StatelessWidget {
     this.onTap,
     this.onBook,
     this.kategori,
+    this.foto,
   }) : super(key: key);
 
   @override
@@ -97,6 +100,15 @@ class ClassCard extends StatelessWidget {
                 ],
               ),
             ),
+
+            // GAMBAR SAMPUL KELAS
+            if (foto != null && foto!.isNotEmpty)
+              Container(
+                width: double.infinity,
+                height: 140,
+                decoration: const BoxDecoration(color: Colors.grey),
+                child: _buildImage(foto!),
+              ),
 
             // Content
             Padding(
@@ -234,6 +246,51 @@ class ClassCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildImage(String fotoPath) {
+    try {
+      // Check if it's a file path
+      if (fotoPath.isNotEmpty) {
+        final file = File(fotoPath);
+        if (file.existsSync()) {
+          return Image.file(
+            file,
+            width: double.infinity,
+            height: 140,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: double.infinity,
+                height: 140,
+                color: Colors.grey[300],
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.image_not_supported, color: Colors.grey),
+                    SizedBox(height: 8),
+                    Text(
+                      'Gambar tidak ditemukan',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        }
+      }
+    } catch (e) {
+      print('Error loading image: $e');
+    }
+
+    // Fallback if image not found
+    return Container(
+      width: double.infinity,
+      height: 140,
+      color: Colors.grey[300],
+      child: const Icon(Icons.image_outlined, color: Colors.grey),
     );
   }
 }

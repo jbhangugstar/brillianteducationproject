@@ -2,7 +2,7 @@ import 'package:brillianteducationproject/extension/navigator.dart';
 import 'package:brillianteducationproject/database/db_helper.dart';
 import 'package:brillianteducationproject/helper/role_helper.dart';
 import 'package:brillianteducationproject/models/user_model.dart';
-import 'package:brillianteducationproject/view/siswa_main_screen.dart';
+import 'package:brillianteducationproject/view/siswaview/siswa_main_screen.dart';
 import 'package:flutter/material.dart';
 
 class RegisterSiswaScreen extends StatefulWidget {

@@ -4,16 +4,20 @@ import 'package:brillianteducationproject/models/user_model.dart';
 
 class DBHelper {
   static Future<Database> db() async {
+    print('\n>>> DBHelper.db() - Getting database...');
     final dbPath = await getDatabasesPath();
+    final dbFile = join(dbPath, 'Brilliant_Education.db');
+    print('    Path: $dbFile');
+
     return openDatabase(
-      join(dbPath, 'Brilliant_Education.db'),
+      dbFile,
       onCreate: (db, version) async {
-        // TABEL USER
+        print('    🆕 Creating new database (version $version)...');
         await db.execute(
           'CREATE TABLE user ( id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, password TEXT, role TEXT, nama TEXT)',
         );
 
-        // TABEL TUTOR - EXPANDED
+        // TABEL TUTOR
         await db.execute('''
         CREATE TABLE tutor (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,7 +41,7 @@ class DBHelper {
           'CREATE TABLE siswa ( id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, email TEXT, password TEXT)',
         );
 
-        // TABEL KELAS - EXPANDED
+        // TABEL KELAS - IMPORTANT!
         await db.execute('''
         CREATE TABLE kelas (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,8 +58,7 @@ class DBHelper {
           jumlah_siswa INTEGER DEFAULT 0,
           rating REAL,
           status TEXT DEFAULT 'aktif',
-          tujuan_pembelajaran TEXT,
-          FOREIGN KEY(id_tutor) REFERENCES tutor(id)
+          tujuan_pembelajaran TEXT
         )
         ''');
 
@@ -69,15 +72,28 @@ class DBHelper {
           nama_kelas TEXT,
           tanggal_daftar TEXT,
           status TEXT DEFAULT 'aktif',
-          nilai_progress REAL DEFAULT 0,
-          FOREIGN KEY(id_siswa) REFERENCES siswa(id),
-          FOREIGN KEY(id_kelas) REFERENCES kelas(id)
+          nilai_progress REAL DEFAULT 0
         )
         ''');
+        print('    ✅ Tables created!');
       },
-      version: 9,
+      version: 10,
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 7) {
+        print('    🔄 Upgrading from v$oldVersion to v$newVersion...');
+        try {
+          // Drop old tables
+          await db.execute('DROP TABLE IF EXISTS kelas');
+          await db.execute('DROP TABLE IF EXISTS enrollment');
+          await db.execute('DROP TABLE IF EXISTS tutor');
+          await db.execute('DROP TABLE IF EXISTS siswa');
+          await db.execute('DROP TABLE IF EXISTS user');
+          print('    ✅ Old tables dropped');
+
+          // Recreate new tables
+          await db.execute(
+            'CREATE TABLE user ( id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, password TEXT, role TEXT, nama TEXT)',
+          );
+
           await db.execute('''
           CREATE TABLE tutor (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -97,11 +113,9 @@ class DBHelper {
           ''');
 
           await db.execute(
-            'CREATE TABLE siswa ( id INTEGER PRIMARY KEY AUTOINCREMENT , nama TEXT, email TEXT, password TEXT)',
+            'CREATE TABLE siswa ( id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, email TEXT, password TEXT)',
           );
-        }
 
-        if (oldVersion < 8) {
           await db.execute('''
           CREATE TABLE kelas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -118,13 +132,10 @@ class DBHelper {
             jumlah_siswa INTEGER DEFAULT 0,
             rating REAL,
             status TEXT DEFAULT 'aktif',
-            tujuan_pembelajaran TEXT,
-            FOREIGN KEY(id_tutor) REFERENCES tutor(id)
+            tujuan_pembelajaran TEXT
           )
           ''');
-        }
 
-        if (oldVersion < 9) {
           await db.execute('''
           CREATE TABLE enrollment (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -134,11 +145,13 @@ class DBHelper {
             nama_kelas TEXT,
             tanggal_daftar TEXT,
             status TEXT DEFAULT 'aktif',
-            nilai_progress REAL DEFAULT 0,
-            FOREIGN KEY(id_siswa) REFERENCES siswa(id),
-            FOREIGN KEY(id_kelas) REFERENCES kelas(id)
+            nilai_progress REAL DEFAULT 0
           )
           ''');
+
+          print('    ✅ New tables created!');
+        } catch (e) {
+          print('    ❌ Error during upgrade: $e');
         }
       },
     );

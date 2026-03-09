@@ -34,8 +34,7 @@ class Kelas {
   });
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
+    final map = {
       'nama_kelas': namaKelas,
       'harga': harga,
       'jadwal': jadwal,
@@ -51,6 +50,9 @@ class Kelas {
       'status': status,
       'tujuan_pembelajaran': tujuanPembelajaran,
     };
+    // Remove null values
+    map.removeWhere((key, value) => value == null);
+    return map;
   }
 
   factory Kelas.fromMap(Map<String, dynamic> map) {

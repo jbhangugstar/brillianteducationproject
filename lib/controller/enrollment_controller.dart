@@ -1,5 +1,6 @@
 import 'package:brillianteducationproject/database/db_helper.dart';
 import 'package:brillianteducationproject/models/enrollment_model.dart';
+import 'package:brillianteducationproject/models/kelas_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class EnrollmentController {
@@ -119,5 +120,20 @@ class EnrollmentController {
       where: 'id = ?',
       whereArgs: [enrollmentId],
     );
+  }
+
+  // GET ENROLLED CLASSES WITH FULL DETAILS FOR STUDENT
+  static Future<List<Kelas>> getEnrolledClassesByStudent(int siswaId) async {
+    final db = await DBHelper.db();
+    final result = await db.rawQuery(
+      '''
+      SELECT k.* FROM kelas k
+      INNER JOIN enrollment e ON k.id = e.id_kelas
+      WHERE e.id_siswa = ? AND e.status = 'aktif'
+      ORDER BY k.jadwal ASC
+      ''',
+      [siswaId],
+    );
+    return result.map((e) => Kelas.fromMap(e)).toList();
   }
 }

@@ -1,8 +1,9 @@
 import 'package:brillianteducationproject/extension/navigator.dart';
 import 'package:brillianteducationproject/database/db_helper.dart';
+import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/helper/role_helper.dart';
 import 'package:brillianteducationproject/view/register_option.dart';
-import 'package:brillianteducationproject/view/siswa_main_screen.dart';
+import 'package:brillianteducationproject/view/siswaview/siswa_main_screen.dart';
 import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -20,8 +21,58 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isVisibility = false;
 
   void visibilityOnOff() {
-    isVisibility = !isVisibility;
-    setState(() {});
+    setState(() {
+      isVisibility = !isVisibility;
+    });
+  }
+
+  Future<void> loginUser() async {
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email dan password wajib diisi')),
+      );
+      return;
+    }
+
+    final user = await DBHelper.loginuser(
+      email: emailController.text,
+      password: passwordController.text,
+    );
+
+    if (user != null) {
+      final prefs = PreferenceHandler();
+
+      // INIT SHARED PREFERENCE
+      await prefs.init();
+
+      // SIMPAN STATUS LOGIN
+      await prefs.storingIsLogin(true);
+
+      // SIMPAN STUDENT ID
+      if (user.id != null) {
+        await prefs.storingStudentId(user.id!);
+      }
+
+      // SIMPAN EMAIL
+      await prefs.storingUserEmail(user.email);
+
+      // DEBUG UNTUK CEK ID
+      final checkId = await PreferenceHandler.getStudentId();
+      print("STUDENT ID TERSIMPAN: $checkId");
+
+      if (!mounted) return;
+
+      // NAVIGASI BERDASARKAN ROLE
+      if (user.role == RoleHelper.siswa) {
+        context.pushAndRemoveAll(const SiswaMainScreen());
+      } else {
+        context.pushAndRemoveAll(const TutorMainScreen());
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email atau password salah')),
+      );
+    }
   }
 
   @override
@@ -48,7 +99,6 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 60),
 
-              // Logo
               Image.asset("assets/icons/logo_brilliant.png", height: 250),
 
               const Text(
@@ -61,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 30),
 
-              // Email
+              // EMAIL
               TextFormField(
                 controller: emailController,
                 decoration: InputDecoration(
@@ -79,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 16),
 
-              // Password
+              // PASSWORD
               TextFormField(
                 controller: passwordController,
                 obscureText: !isVisibility,
@@ -103,45 +153,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 24),
 
-              // Tombol Login
+              // BUTTON LOGIN
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    if (emailController.text.isEmpty ||
-                        passwordController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Email dan password wajib diisi'),
-                        ),
-                      );
-                      return;
-                    }
-
-                    final user = await DBHelper.loginuser(
-                      email: emailController.text,
-                      password: passwordController.text,
-                    );
-
-                    if (user != null) {
-                      if (context.mounted) {
-                        if (user.role == RoleHelper.siswa) {
-                          context.pushAndRemoveAll(const SiswaMainScreen());
-                        } else {
-                          context.pushAndRemoveAll(const TutorMainScreen());
-                        }
-                      }
-                    } else {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Email atau password salah'),
-                          ),
-                        );
-                      }
-                    }
-                  },
+                  onPressed: loginUser,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
@@ -161,7 +178,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 30),
 
-              // Text daftar
               const Text(
                 "Belum punya akun? Daftar",
                 style: TextStyle(color: Colors.white),
@@ -169,7 +185,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 8),
 
-              // Tombol daftar
               SizedBox(
                 width: double.infinity,
                 height: 50,
