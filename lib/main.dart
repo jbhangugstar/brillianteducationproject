@@ -1,21 +1,18 @@
 import 'package:brillianteducationproject/database/preference.dart';
-import 'package:brillianteducationproject/view/siswaview/login_screen.dart';
+import 'package:brillianteducationproject/view/siswaview/siswa_main_screen.dart';
+import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final prefs = PreferenceHandler();
+  await prefs.init();
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  void main() async {
-    WidgetsFlutterBinding.ensureInitialized();
-
-    final prefs = PreferenceHandler();
-    await prefs.init();
-
-    runApp(const MyApp());
-  }
-
   const MyApp({super.key});
 
   @override
@@ -27,7 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: LoginScreen(),
+      home: TutorMainScreen(),
     );
   }
 }

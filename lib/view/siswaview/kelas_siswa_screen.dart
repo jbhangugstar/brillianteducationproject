@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
-import 'package:brillianteducationproject/controller/enrollment_controller.dart';
-import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
-import 'package:brillianteducationproject/models/enrollment_model.dart';
 import 'package:brillianteducationproject/widget/class_card.dart';
 import 'package:brillianteducationproject/widget/search_bar.dart'
     as custom_search;
+import 'package:brillianteducationproject/view/siswaview/pembayaran_screen.dart';
 
 class KelasSiswaScreen extends StatefulWidget {
   const KelasSiswaScreen({super.key});
@@ -26,18 +24,10 @@ class _KelasSiswaScreenState extends State<KelasSiswaScreen> {
 
   final List<String> categories = ['Semua', 'Sains', 'Literature'];
 
-  late PreferenceHandler prefs;
-
   @override
   void initState() {
     super.initState();
-    initPreference();
     loadKelas();
-  }
-
-  Future<void> initPreference() async {
-    prefs = PreferenceHandler();
-    await prefs.init();
   }
 
   // =============================
@@ -86,6 +76,7 @@ class _KelasSiswaScreenState extends State<KelasSiswaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
+
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -95,6 +86,7 @@ class _KelasSiswaScreenState extends State<KelasSiswaScreen> {
         ),
         centerTitle: true,
       ),
+
       body: isLoading
           ? const Center(
               child: CircularProgressIndicator(color: Color(0xFF6C4FD8)),
@@ -180,81 +172,18 @@ class _KelasSiswaScreenState extends State<KelasSiswaScreen> {
                         kategori: kelas.kategori,
                         foto: kelas.foto,
 
-                        onBook: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text("Konfirmasi Pendaftaran"),
-                              content: Text(
-                                "Apakah Anda yakin ingin mendaftar ke kelas ${kelas.namaKelas}?",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("Batal"),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    Navigator.pop(context);
-
-                                    try {
-                                      final studentId =
-                                          await PreferenceHandler.getStudentId();
-
-                                      print("Student ID: $studentId");
-
-                                      if (studentId == null) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            backgroundColor: Colors.red,
-                                            content: Text(
-                                              "Student ID tidak ditemukan",
-                                            ),
-                                          ),
-                                        );
-                                        return;
-                                      }
-
-                                      final enrollment = EnrollmentModel(
-                                        idSiswa: studentId,
-                                        idKelas: kelas.id ?? 0,
-                                        namaSiswa: '',
-                                        namaKelas: kelas.namaKelas,
-                                        tanggalDaftar: DateTime.now()
-                                            .toString()
-                                            .split(' ')[0],
-                                        status: 'aktif',
-                                        nilaiProgress: 0.0,
-                                      );
-
-                                      final result =
-                                          await EnrollmentController.enrollStudent(
-                                            enrollment,
-                                          );
-
-                                      if (result > 0) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            backgroundColor: Colors.green,
-                                            content: Text(
-                                              "Berhasil daftar ${kelas.namaKelas}",
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    } catch (e) {
-                                      print(e);
-                                    }
-                                  },
-                                  child: const Text("Daftar"),
-                                ),
-                              ],
+                        onBook: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PembayaranScreen(kelas: kelas),
                             ),
                           );
+
+                          if (result == "jadwal") {
+                            DefaultTabController.of(context).animateTo(2);
+                          }
                         },
                       );
                     },

@@ -125,15 +125,19 @@ class EnrollmentController {
   // GET ENROLLED CLASSES WITH FULL DETAILS FOR STUDENT
   static Future<List<Kelas>> getEnrolledClassesByStudent(int siswaId) async {
     final db = await DBHelper.db();
+
     final result = await db.rawQuery(
       '''
-      SELECT k.* FROM kelas k
-      INNER JOIN enrollment e ON k.id = e.id_kelas
-      WHERE e.id_siswa = ? AND e.status = 'aktif'
-      ORDER BY k.jadwal ASC
-      ''',
+    SELECT k.* FROM kelas k
+    INNER JOIN enrollment e ON k.id = e.id_kelas
+    WHERE e.id_siswa = ?
+    ORDER BY k.jadwal ASC
+    ''',
       [siswaId],
     );
+
+    print("ENROLLED CLASSES RESULT: $result");
+
     return result.map((e) => Kelas.fromMap(e)).toList();
   }
 }

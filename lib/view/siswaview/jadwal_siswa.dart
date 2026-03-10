@@ -10,14 +10,22 @@ class JadwalSiswaScreen extends StatefulWidget {
   State<JadwalSiswaScreen> createState() => _JadwalSiswaScreenState();
 }
 
-class _JadwalSiswaScreenState extends State<JadwalSiswaScreen> {
+class _JadwalSiswaScreenState extends State<JadwalSiswaScreen>
+    with WidgetsBindingObserver {
   List<Kelas> enrolledClasses = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadEnrolledClasses();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override

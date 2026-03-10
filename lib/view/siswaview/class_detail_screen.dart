@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/controller/enrollment_controller.dart';
 import 'package:brillianteducationproject/widget/student_enrollment_card.dart';
+import 'package:brillianteducationproject/database/preference.dart';
+import 'package:brillianteducationproject/models/enrollment_model.dart';
+import 'package:brillianteducationproject/controller/siswa_controller.dart';
+import 'package:brillianteducationproject/models/siswa_model.dart';
 
 class ClassDetailScreen extends StatefulWidget {
   final int kelasId;
@@ -28,6 +32,90 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     studentsFuture = EnrollmentController.getEnrollmentsByClass(widget.kelasId);
   }
 
+  Future<void> daftarKelas(dynamic kelas) async {
+    int? studentId = await PreferenceHandler.getStudentId();
+
+    if (studentId == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Student ID tidak ditemukan"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    String? email = await PreferenceHandler.getUserEmail();
+
+    if (email == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Email tidak ditemukan"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    SiswaModel? siswa = await SiswaController.getSiswaByEmail(email);
+
+    if (siswa == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Data siswa tidak ditemukan"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    bool sudahDaftar = await EnrollmentController.isStudentEnrolled(
+      studentId,
+      widget.kelasId,
+    );
+
+    if (sudahDaftar) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Kamu sudah terdaftar di kelas ini"),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    EnrollmentModel enrollment = EnrollmentModel(
+      idSiswa: studentId,
+      idKelas: widget.kelasId,
+      namaSiswa: siswa.nama,
+      namaKelas: kelas['nama_kelas'],
+      status: "aktif",
+      nilaiProgress: 0,
+      tanggalDaftar: DateTime.now().toString(),
+    );
+
+    await EnrollmentController.enrollStudent(enrollment);
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.green,
+        content: Text("Berhasil daftar ke ${kelas['nama_kelas']}!"),
+      ),
+    );
+
+    setState(() {
+      studentsFuture = EnrollmentController.getEnrollmentsByClass(
+        widget.kelasId,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +140,6 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
 
           return CustomScrollView(
             slivers: [
-              // App Bar dengan Header
               SliverAppBar(
                 expandedHeight: 200,
                 pinned: true,
@@ -72,125 +159,33 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         end: Alignment.bottomRight,
                       ),
                     ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          right: -30,
-                          top: -30,
-                          child: Container(
-                            width: 150,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (kelas['kategori'] != null)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    kelas['kategori'],
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ),
 
-              // Content
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Quick Info
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildQuickInfo(
-                              icon: Icons.people,
-                              label: 'Siswa',
-                              value: '${kelas['jumlah_siswa'] ?? 0}',
-                            ),
-                            _buildQuickInfo(
-                              icon: Icons.star,
-                              label: 'Rating',
-                              value: '${kelas['rating'] ?? 0}',
-                            ),
-                            _buildQuickInfo(
-                              icon: Icons.schedule,
-                              label: 'Durasi',
-                              value: '${kelas['durasi'] ?? 0} jam',
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Harga dan Tombol
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Harga per Sesi',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Rp ${kelas['harga']}',
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF6C4FD8),
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'Rp ${kelas['harga']}',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF6C4FD8),
+                            ),
                           ),
                           ElevatedButton.icon(
+                            icon: const Icon(Icons.check),
+                            label: const Text("Daftar"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF6C4FD8),
+                            ),
                             onPressed: () {
                               showDialog(
                                 context: context,
@@ -205,189 +200,22 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                                       child: const Text("Batal"),
                                     ),
                                     ElevatedButton(
-                                      onPressed: () {
+                                      onPressed: () async {
                                         Navigator.pop(context);
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            backgroundColor: Colors.green,
-                                            content: Text(
-                                              "Berhasil daftar ke ${kelas['nama_kelas']}!",
-                                            ),
-                                            behavior: SnackBarBehavior.floating,
-                                            margin: const EdgeInsets.all(16),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                        );
+                                        await daftarKelas(kelas);
                                       },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(
-                                          0xFF6C4FD8,
-                                        ),
-                                      ),
                                       child: const Text("Daftar"),
                                     ),
                                   ],
                                 ),
                               );
                             },
-                            icon: const Icon(Icons.check),
-                            label: const Text('Daftar'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF6C4FD8),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                            ),
                           ),
                         ],
                       ),
 
                       const SizedBox(height: 24),
 
-                      // Deskripsi
-                      const Text(
-                        'Deskripsi Kelas',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.grey.withOpacity(0.2),
-                          ),
-                        ),
-                        child: Text(
-                          kelas['deskripsi'] ??
-                              'Tidak ada deskripsi untuk kelas ini.',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Tujuan Pembelajaran
-                      if (kelas['tujuan_pembelajaran'] != null) ...[
-                        const Text(
-                          'Tujuan Pembelajaran',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF6C4FD8).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: const Color(0xFF6C4FD8).withOpacity(0.3),
-                            ),
-                          ),
-                          child: Text(
-                            kelas['tujuan_pembelajaran'],
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.black87,
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // Jadwal
-                      const Text(
-                        'Jadwal Kelas',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.grey.withOpacity(0.2),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.schedule,
-                              color: Color(0xFF6C4FD8),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              kelas['jadwal'] ?? 'Jadwal tidak tersedia',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Colors.black87,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Tingkat Kesukaran
-                      if (kelas['tingkat_kesukaran'] != null) ...[
-                        const Text(
-                          'Tingkat Kesukaran',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getDifficultyColor(
-                              kelas['tingkat_kesukaran'],
-                            ).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            kelas['tingkat_kesukaran'],
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: _getDifficultyColor(
-                                kelas['tingkat_kesukaran'],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // Section Siswa Terdaftar
                       const Text(
                         'Siswa Terdaftar',
                         style: TextStyle(
@@ -395,13 +223,13 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+
                       const SizedBox(height: 12),
                     ],
                   ),
                 ),
               ),
 
-              // Students List
               FutureBuilder<List<dynamic>>(
                 future: studentsFuture,
                 builder: (context, studentSnapshot) {
@@ -410,9 +238,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                     return const SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.all(16),
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF6C4FD8),
-                        ),
+                        child: CircularProgressIndicator(),
                       ),
                     );
                   }
@@ -420,36 +246,10 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                   final students = studentSnapshot.data ?? [];
 
                   if (students.isEmpty) {
-                    return SliverToBoxAdapter(
+                    return const SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.grey.withOpacity(0.2),
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.people_outline,
-                                size: 48,
-                                color: Colors.grey.withOpacity(0.3),
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'Belum ada siswa yang terdaftar',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        padding: EdgeInsets.all(16),
+                        child: Text("Belum ada siswa yang terdaftar"),
                       ),
                     );
                   }
@@ -457,13 +257,9 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                   return SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final student = students[index];
+
                       return Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          16,
-                          index == 0 ? 16 : 0,
-                          16,
-                          16,
-                        ),
+                        padding: const EdgeInsets.all(16),
                         child: StudentEnrollmentCard(
                           namaSiswa:
                               student['nama_siswa'] ?? 'Siswa Tidak Diketahui',
@@ -479,47 +275,11 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                 },
               ),
 
-              // Bottom Spacing
               const SliverToBoxAdapter(child: SizedBox(height: 20)),
             ],
           );
         },
       ),
     );
-  }
-
-  Widget _buildQuickInfo({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Column(
-      children: [
-        Icon(icon, color: const Color(0xFF6C4FD8), size: 24),
-        const SizedBox(height: 6),
-        Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-      ],
-    );
-  }
-
-  Color _getDifficultyColor(String difficulty) {
-    switch (difficulty.toLowerCase()) {
-      case 'pemula':
-      case 'mudah':
-        return Colors.green;
-      case 'menengah':
-      case 'sedang':
-        return Colors.orange;
-      case 'lanjut':
-      case 'sulit':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
   }
 }

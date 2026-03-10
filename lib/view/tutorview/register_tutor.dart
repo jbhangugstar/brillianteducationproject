@@ -22,6 +22,9 @@ class _RegistertutorScreenState extends State<RegistertutorScreen> {
       TextEditingController();
   bool isAgreed = false;
 
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
   @override
   void dispose() {
     nameController.dispose();
@@ -103,6 +106,7 @@ class _RegistertutorScreenState extends State<RegistertutorScreen> {
                 const SizedBox(height: 8),
                 TextField(
                   controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     hintText: "contoh@email.com",
                     prefixIcon: Icon(Icons.email),
@@ -117,15 +121,26 @@ class _RegistertutorScreenState extends State<RegistertutorScreen> {
                 // Password
                 const Text("Kata Sandi"),
                 const SizedBox(height: 8),
-                TextField(
+                TextFormField(
                   controller: passwordController,
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    hintText: "Masukkan kata sandi",
-                    prefixIcon: Icon(Icons.lock),
-                    suffixIcon: Icon(Icons.visibility),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(Icons.lock),
+                    hintText: "Masukkan kata sandi",
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
                   ),
                 ),
@@ -135,14 +150,26 @@ class _RegistertutorScreenState extends State<RegistertutorScreen> {
                 // Konfirmasi Password
                 const Text("Konfirmasi Kata Sandi"),
                 const SizedBox(height: 8),
-                TextField(
+                TextFormField(
                   controller: confirmPasswordController,
-                  obscureText: true,
+                  obscureText: _obscureConfirmPassword,
                   decoration: InputDecoration(
-                    hintText: "Ulangi kata sandi",
-                    prefixIcon: Icon(Icons.lock_outline),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(Icons.lock),
+                    hintText: "Ulangi kata sandi",
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirmPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
                     ),
                   ),
                 ),
