@@ -57,4 +57,20 @@ class PreferenceHandler {
     await _preferences.remove(_studentId);
     await _preferences.remove(_userEmail);
   }
+
+  // ========================
+  // GET TUTOR ID
+  // ========================
+  static Future<int?> getTutorId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('tutor_id'); // pastikan key sesuai saat login tutor
+  }
+
+  // ========================
+  // SET TUTOR ID (misal saat login)
+  // ========================
+  static Future<void> setTutorId(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('tutor_id', id);
+  }
 }

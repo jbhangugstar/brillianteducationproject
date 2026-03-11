@@ -1,4 +1,5 @@
 import 'package:brillianteducationproject/view/tutorview/home_tutor.dart';
+import 'package:brillianteducationproject/view/tutorview/jadwal_tutor.dart';
 import 'package:brillianteducationproject/view/tutorview/kelas_tutor_screen.dart';
 import 'package:flutter/material.dart';
 import 'profil_tutor_screen.dart';
@@ -16,6 +17,7 @@ class _TutorMainScreenState extends State<TutorMainScreen> {
   final List<Widget> _pages = const [
     HomeTutorScreen(),
     KelasTutorScreen(),
+    JadwalTutorScreen(),
     ProfilTutorScreen(),
   ];
 
@@ -37,6 +39,10 @@ class _TutorMainScreenState extends State<TutorMainScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Kelas'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.schedule),
+            label: 'Jadwal Saya',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),

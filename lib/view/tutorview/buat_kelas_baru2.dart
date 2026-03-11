@@ -13,6 +13,8 @@ class BuatKelasStep2Screen extends StatefulWidget {
   final String tutor;
   final String deskripsi;
   final String gambar;
+  final int? kelasId;
+  final int? tutorId; // ⭐ tutorId ditambahkan
 
   const BuatKelasStep2Screen({
     super.key,
@@ -23,6 +25,8 @@ class BuatKelasStep2Screen extends StatefulWidget {
     required this.tutor,
     required this.deskripsi,
     required this.gambar,
+    this.kelasId,
+    this.tutorId, // ⭐ wajib kirim dari Step 1
   });
 
   @override
@@ -33,40 +37,21 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
   bool _isLoading = false;
 
   Future<void> _terbitkanKelas() async {
-    print('\n===============================================');
-    print('MULAI TERBITKAN KELAS');
-    print('===============================================');
-
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // 1. Log data
-      print('\n1️⃣ DATA YANG DITERIMA:');
-      print('   Nama: ${widget.namaKelas}');
-      print('   Kategori: ${widget.kategori}');
-      print('   Jadwal: ${widget.jadwal}');
-      print('   Harga: ${widget.harga}');
-      print('   Tutor: ${widget.tutor}');
-      print('   Deskripsi: ${widget.deskripsi}');
-
-      // 2. Validate
       if (widget.namaKelas.isEmpty) {
-        throw Exception('Nama kelas kosong!');
+        throw Exception("Nama kelas tidak boleh kosong");
       }
 
-      // 3. Convert harga to int
       final hargaInt = int.tryParse(widget.harga);
-      print('\n2️⃣ VALIDASI:');
-      print('   Harga as int: $hargaInt');
-
       if (hargaInt == null) {
-        throw Exception('Harga tidak valid: ${widget.harga}');
+        throw Exception("Harga tidak valid");
       }
 
-      // 4. Create Kelas object
-      print('\n3️⃣ CREATE KELAS OBJECT:');
+      // Buat object Kelas
       final kelas = Kelas(
         namaKelas: widget.namaKelas,
         harga: hargaInt,
@@ -78,80 +63,42 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
         status: 'aktif',
         jumlahSiswa: 0,
         rating: 0.0,
+        idTutor: widget.tutorId, // ⭐ penting! supaya muncul di Jadwal Tutor
       );
-      print('   ✅ Kelas object created');
-      print('   Map: ${kelas.toMap()}');
 
-      // 5. Save to database
-      print('\n4️⃣ SAVE TO DATABASE:');
       late int result;
-      try {
-        result = await KelasController.createKelas(kelas);
-      } catch (e) {
-        print('   ❌ Exception caught: $e');
-        throw Exception('Gagal menyimpan ke database: $e');
-      }
-      print('   Raw Result: $result (type: ${result.runtimeType})');
 
-      // 6. Check result
-      print('\n5️⃣ CHECK RESULT:');
-      print('   Checking: $result > 0 = ${result > 0}');
+      // MODE EDIT
+      if (widget.kelasId != null) {
+        result = await KelasController.updateKelas(widget.kelasId!, kelas);
+      } else {
+        // MODE CREATE
+        result = await KelasController.createKelas(kelas);
+      }
 
       if (result > 0) {
-        print('   ✅✅✅ BERHASIL! ID: $result ✅✅✅');
+        final message = widget.kelasId != null
+            ? "Kelas berhasil diperbarui"
+            : "Kelas berhasil diterbitkan";
 
         if (mounted) {
-          // Success notification
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('✅ Kelas berhasil diterbitkan!'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 3),
-            ),
+            SnackBar(content: Text(message), backgroundColor: Colors.green),
           );
 
-          // Tunggu 1.5 detik baru navigate
-          await Future.delayed(const Duration(milliseconds: 1500));
+          await Future.delayed(const Duration(milliseconds: 1200));
 
           if (mounted) {
-            print('   Navigating to TutorMainScreen...');
             context.push(TutorMainScreen());
           }
         }
-      } else if (result == -1) {
-        print('   ❌ GAGAL! Database Error (result: -1)');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('❌ Gagal menyimpan ke database!'),
-              backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
       } else {
-        print('   ❌ GAGAL! Unexpected result: $result');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('❌ Gagal menerbitkan kelas (result: $result)'),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
+        throw Exception("Gagal menyimpan kelas");
       }
-    } catch (e, st) {
-      print('❌ ERROR: $e');
-      print('Stack: $st');
-
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('ERROR: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+          SnackBar(content: Text("ERROR: $e"), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -161,14 +108,12 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
         });
       }
     }
-
-    print('\n===============================================');
-    print('END TERBITKAN KELAS');
-    print('===============================================\n');
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool isEdit = widget.kelasId != null;
+
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
       appBar: AppBar(
@@ -180,25 +125,24 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
             context.push(BuatKelasBaruScreen());
           },
         ),
-        title: const Text(
-          "Buat Kelas Baru",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+        title: Text(
+          isEdit ? "Edit Kelas" : "Buat Kelas Baru",
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// STEP INFO
             const Text(
               "Langkah 2 dari 2",
               style: TextStyle(color: Colors.grey),
             ),
-
             const SizedBox(height: 4),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
@@ -215,19 +159,14 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
                 ),
               ],
             ),
-
             const SizedBox(height: 8),
-
             LinearProgressIndicator(
               value: 1,
               backgroundColor: Colors.grey.shade300,
               color: const Color(0xff3D5AFE),
               minHeight: 6,
             ),
-
             const SizedBox(height: 25),
-
-            /// REVIEW DATA KELAS
             Container(
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -240,7 +179,7 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
                 children: [
                   const Text(
                     'Ringkasan Data Kelas',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   _buildReviewItem('Nama Kelas', widget.namaKelas),
@@ -256,116 +195,7 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
                 ],
               ),
             ),
-
-            const SizedBox(height: 25),
-
-            /// MATERI KELAS
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Kurikulum / Materi Kelas",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xffE8EDFF),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Text(
-                    "3 Materi",
-                    style: TextStyle(color: Color(0xff3D5AFE), fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 15),
-
-            materiItem("Materi 1: Pengenalan Aljabar", "Durasi: 10 Menit"),
-
-            materiItem("Materi 2: Latihan Dasar Logika", "Kuis: 10 Soal"),
-
-            materiItem("Materi 3: Fungsi Kuadrat Dasar", "Video: 20 Menit"),
-
-            const SizedBox(height: 10),
-
-            /// TAMBAH MATERI
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.grey.shade400,
-                  style: BorderStyle.solid,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Center(
-                child: Text(
-                  "+ Tambah Materi Baru",
-                  style: TextStyle(
-                    color: Color(0xff3D5AFE),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            /// VISIBILITAS
-            const Text(
-              "Pengaturan Visibilitas",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 15),
-
-            visibilityCard(
-              title: "Publik",
-              subtitle: "Dapat ditemukan semua orang di pencarian",
-              selected: true,
-            ),
-
-            const SizedBox(height: 10),
-
-            visibilityCard(
-              title: "Privat",
-              subtitle: "Hanya siswa dengan link yang bisa masuk",
-              selected: false,
-            ),
-
-            const SizedBox(height: 25),
-
-            /// PERSYARATAN
-            const Text(
-              "Persyaratan Siswa (OPSIONAL)",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 10),
-
-            TextField(
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: "Contoh: Memahami operasi hitung dasar matematika...",
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-
             const SizedBox(height: 40),
-
-            /// BUTTON
             Row(
               children: [
                 Expanded(
@@ -382,9 +212,7 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
                     child: const Text("Kembali"),
                   ),
                 ),
-
                 const SizedBox(width: 15),
-
                 Expanded(
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _terbitkanKelas,
@@ -406,9 +234,9 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
                               ),
                             ),
                           )
-                        : const Text(
-                            "Terbitkan Kelas",
-                            style: TextStyle(color: Colors.white),
+                        : Text(
+                            isEdit ? "Simpan Perubahan" : "Terbitkan Kelas",
+                            style: const TextStyle(color: Colors.white),
                           ),
                   ),
                 ),
@@ -420,7 +248,6 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
     );
   }
 
-  /// WIDGET REVIEW ITEM
   Widget _buildReviewItem(
     String label,
     String value, {
@@ -444,89 +271,7 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
             value,
             maxLines: isMultiline ? 3 : 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// WIDGET MATERI ITEM
-  Widget materiItem(String title, String subtitle) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.description, color: Color(0xff3D5AFE)),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-
-          const Icon(Icons.delete_outline, color: Colors.grey),
-        ],
-      ),
-    );
-  }
-
-  /// WIDGET VISIBILITY
-  Widget visibilityCard({
-    required String title,
-    required String subtitle,
-    required bool selected,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: selected ? const Color(0xffEEF1FF) : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: selected ? const Color(0xff3D5AFE) : Colors.grey.shade300,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            selected ? Icons.radio_button_checked : Icons.radio_button_off,
-            color: const Color(0xff3D5AFE),
-          ),
-
-          const SizedBox(width: 12),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-            ],
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
           ),
         ],
       ),
