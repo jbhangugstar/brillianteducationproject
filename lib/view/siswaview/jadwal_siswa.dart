@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:brillianteducationproject/controller/enrollment_controller.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
@@ -88,13 +89,12 @@ class _JadwalSiswaScreenState extends State<JadwalSiswaScreen>
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F6FA),
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
+          backgroundColor: const Color(0xFFB23AEE),
           automaticallyImplyLeading: false,
           title: const Text(
-            "Jadwal Saya",
+            "Brilliant Education",
             style: TextStyle(
-              color: Colors.black87,
+              color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),

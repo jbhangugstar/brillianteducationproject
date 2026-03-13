@@ -1,5 +1,5 @@
 import 'package:brillianteducationproject/extension/navigator.dart';
-import 'package:brillianteducationproject/view/siswaview/login_screen.dart';
+import 'package:brillianteducationproject/view/login_screen.dart';
 import 'package:brillianteducationproject/view/siswaview/registersiswa_screen.dart';
 import 'package:brillianteducationproject/view/tutorview/register_tutor.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +31,7 @@ class RegisteroptionScreen extends StatelessWidget {
             children: [
               // Logo
               Image.asset(
-                "assets/icons/logo_brilliant.png",
+                "assets/image/brilliantlogo.png",
                 height: 300,
                 width: 800,
               ),

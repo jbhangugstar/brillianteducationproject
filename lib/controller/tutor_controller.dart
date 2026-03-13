@@ -2,17 +2,20 @@ import 'package:brillianteducationproject/models/tutor_model.dart';
 import 'package:brillianteducationproject/database/db_helper.dart';
 
 class TutorController {
+  // Fungsi untuk mendaftarkan tutor baru
   static Future<int> registerTutor(TutorModel tutor) async {
     final dbs = await DBHelper.db();
     return await dbs.insert('tutor', tutor.toMap());
   }
 
+  // Fungsi untuk mengambil semua data tutor
   static Future<List<TutorModel>> getAllTutor() async {
     final dbs = await DBHelper.db();
     final List<Map<String, dynamic>> results = await dbs.query("tutor");
     return results.map((e) => TutorModel.fromMap(e)).toList();
   }
 
+  // Fungsi untuk mengambil data tutor berdasarkan ID
   static Future<TutorModel?> getTutorById(int id) async {
     final dbs = await DBHelper.db();
     final List<Map<String, dynamic>> results = await dbs.query(
@@ -26,6 +29,7 @@ class TutorController {
     return null;
   }
 
+  // Fungsi untuk mencari tutor berdasarkan nama, mata pelajaran, atau keahlian
   static Future<List<TutorModel>> searchTutor(String keyword) async {
     final dbs = await DBHelper.db();
     final List<Map<String, dynamic>> results = await dbs.query(
@@ -36,6 +40,7 @@ class TutorController {
     return results.map((e) => TutorModel.fromMap(e)).toList();
   }
 
+  // Fungsi untuk mengambil tutor berdasarkan mata pelajaran
   static Future<List<TutorModel>> getTutorBySubject(String subject) async {
     final dbs = await DBHelper.db();
     final List<Map<String, dynamic>> results = await dbs.query(
@@ -46,6 +51,7 @@ class TutorController {
     return results.map((e) => TutorModel.fromMap(e)).toList();
   }
 
+  // Fungsi untuk memperbarui data tutor
   static Future<int> updateTutor(TutorModel tutor) async {
     final dbs = await DBHelper.db();
     if (tutor.id == null) {
@@ -59,12 +65,13 @@ class TutorController {
     );
   }
 
+  // Fungsi untuk menghapus tutor berdasarkan ID
   static Future<int> deleteTutor(int id) async {
     final dbs = await DBHelper.db();
     return dbs.delete('tutor', where: 'id = ?', whereArgs: [id]);
   }
 
-  // Get top rated tutors
+  // Fungsi untuk mendapatkan tutor dengan rating tertinggi
   static Future<List<TutorModel>> getTopRatedTutor({int limit = 5}) async {
     final dbs = await DBHelper.db();
     final List<Map<String, dynamic>> results = await dbs.query(
@@ -75,7 +82,7 @@ class TutorController {
     return results.map((e) => TutorModel.fromMap(e)).toList();
   }
 
-  // Get tutors with most students
+  // Fungsi untuk mendapatkan tutor dengan siswa terbanyak
   static Future<List<TutorModel>> getPopularTutor({int limit = 5}) async {
     final dbs = await DBHelper.db();
     final List<Map<String, dynamic>> results = await dbs.query(
@@ -86,7 +93,7 @@ class TutorController {
     return results.map((e) => TutorModel.fromMap(e)).toList();
   }
 
-  // Update student count for a tutor
+  // Fungsi untuk memperbarui jumlah siswa yang diajar oleh tutor
   static Future<void> updateTutorStudentCount(int tutorId, int count) async {
     final dbs = await DBHelper.db();
     await dbs.update(
@@ -97,7 +104,7 @@ class TutorController {
     );
   }
 
-  // Update tutor rating
+  // Fungsi untuk memperbarui rating tutor
   static Future<void> updateTutorRating(int tutorId, double rating) async {
     final dbs = await DBHelper.db();
     await dbs.update(

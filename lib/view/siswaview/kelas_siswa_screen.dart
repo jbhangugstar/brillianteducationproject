@@ -91,11 +91,11 @@ class _KelasSiswaScreenState extends State<KelasSiswaScreen> {
       backgroundColor: const Color(0xFFF5F6FA),
 
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFB23AEE),
         elevation: 0,
         title: const Text(
-          "Katalog Kelas",
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+          "Brilliant Education",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),

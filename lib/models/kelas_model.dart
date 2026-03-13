@@ -33,6 +33,43 @@ class Kelas {
     this.tujuanPembelajaran,
   });
 
+  // =================== COPYWITH ===================
+  Kelas copyWith({
+    int? id,
+    String? namaKelas,
+    int? harga,
+    String? jadwal,
+    String? tutor,
+    String? deskripsi,
+    String? foto,
+    String? kategori,
+    int? durasi,
+    String? tingkatKesukaran,
+    int? idTutor,
+    int? jumlahSiswa,
+    double? rating,
+    String? status,
+    String? tujuanPembelajaran,
+  }) {
+    return Kelas(
+      id: id ?? this.id,
+      namaKelas: namaKelas ?? this.namaKelas,
+      harga: harga ?? this.harga,
+      jadwal: jadwal ?? this.jadwal,
+      tutor: tutor ?? this.tutor,
+      deskripsi: deskripsi ?? this.deskripsi,
+      foto: foto ?? this.foto,
+      kategori: kategori ?? this.kategori,
+      durasi: durasi ?? this.durasi,
+      tingkatKesukaran: tingkatKesukaran ?? this.tingkatKesukaran,
+      idTutor: idTutor ?? this.idTutor,
+      jumlahSiswa: jumlahSiswa ?? this.jumlahSiswa,
+      rating: rating ?? this.rating,
+      status: status ?? this.status,
+      tujuanPembelajaran: tujuanPembelajaran ?? this.tujuanPembelajaran,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     final map = {
       'nama_kelas': namaKelas,
@@ -50,7 +87,6 @@ class Kelas {
       'status': status,
       'tujuan_pembelajaran': tujuanPembelajaran,
     };
-    // Remove null values
     map.removeWhere((key, value) => value == null);
     return map;
   }
@@ -69,7 +105,7 @@ class Kelas {
       tingkatKesukaran: map['tingkat_kesukaran'],
       idTutor: map['id_tutor'],
       jumlahSiswa: map['jumlah_siswa'],
-      rating: map['rating'],
+      rating: map['rating']?.toDouble(),
       status: map['status'],
       tujuanPembelajaran: map['tujuan_pembelajaran'],
     );

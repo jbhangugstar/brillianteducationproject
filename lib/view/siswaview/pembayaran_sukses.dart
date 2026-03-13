@@ -1,6 +1,4 @@
 import 'package:brillianteducationproject/extension/navigator.dart';
-import 'package:brillianteducationproject/view/siswaview/jadwal_siswa.dart';
-import 'package:brillianteducationproject/view/siswaview/kelas_siswa_screen.dart';
 import 'package:brillianteducationproject/view/siswaview/siswa_main_screen.dart';
 import 'package:flutter/material.dart';
 

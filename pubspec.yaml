@@ -31,6 +31,9 @@ dependencies:
   flutter:
     sdk: flutter
   image_picker: ^1.0.7
+  flutter_launcher_icons: ^0.14.4
+  lottie: ^3.3.2
+  animate_do: ^4.2.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -42,6 +45,14 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/image/applogo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/image/applogo.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -62,7 +73,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/icons/
+    - assets/image/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

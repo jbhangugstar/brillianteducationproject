@@ -199,7 +199,7 @@ class _RegistertutorScreenState extends State<RegistertutorScreen> {
                                 color: Color.fromARGB(255, 10, 50, 82),
                               ),
                             ),
-                            TextSpan(text: " serta "),
+                            TextSpan(text: "serta"),
                             TextSpan(
                               text: "Kebijakan Privasi",
                               style: TextStyle(

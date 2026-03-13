@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
 import 'package:brillianteducationproject/database/preference.dart';
+import 'package:brillianteducationproject/view/tutorview/manage_students_screen.dart';
 
 class JadwalTutorScreen extends StatefulWidget {
   const JadwalTutorScreen({super.key});
@@ -60,12 +61,12 @@ class _JadwalTutorScreenState extends State<JadwalTutorScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFB23AEE),
         elevation: 0,
         title: const Text(
-          "Kelas yang Saya Ajar",
+          "Brilliant Education",
           style: TextStyle(
-            color: Colors.black87,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -299,15 +300,17 @@ class _JadwalTutorScreenState extends State<JadwalTutorScreen>
                                                 ),
                                                 ElevatedButton(
                                                   onPressed: () {
-                                                    ScaffoldMessenger.of(
+                                                    // Pindah ke halaman ManageStudentsScreen
+                                                    Navigator.push(
                                                       context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        backgroundColor:
-                                                            Colors.blue,
-                                                        content: Text(
-                                                          'Mengelola kelas ${kelas.namaKelas}...',
-                                                        ),
+                                                      MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            ManageStudentsScreen(
+                                                              kelasId:
+                                                                  kelas.id ?? 0,
+                                                              namaKelas: kelas
+                                                                  .namaKelas,
+                                                            ),
                                                       ),
                                                     );
                                                   },

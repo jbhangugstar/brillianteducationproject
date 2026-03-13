@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:brillianteducationproject/controller/enrollment_controller.dart';
+import 'package:brillianteducationproject/controller/kelas_controller.dart';
+import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/widget/student_enrollment_card.dart';
 import 'package:brillianteducationproject/widget/search_bar.dart'
     as custom_search;
@@ -24,6 +26,7 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
   List<dynamic> filteredStudents = [];
   String searchQuery = '';
   String filterStatus = 'Semua';
+  bool isAuthorized = true; // ✅ CEK OWNERSHIP
 
   final List<String> statusOptions = [
     'Semua',
@@ -35,7 +38,48 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
   @override
   void initState() {
     super.initState();
-    studentsFuture = EnrollmentController.getEnrollmentsByClass(widget.kelasId);
+    _checkAuthorization();
+  }
+
+  // ✅ VALIDASI APAKAH TUTOR YANG LOGIN ADALAH PEMILIK KELAS
+  Future<void> _checkAuthorization() async {
+    try {
+      final tutorId = await PreferenceHandler.getTutorId();
+      final kelas = await KelasController.getKelasById(widget.kelasId);
+
+      if (tutorId == null || kelas == null || kelas.idTutor != tutorId) {
+        setState(() {
+          isAuthorized = false;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Anda tidak memiliki akses untuk mengelola kelas ini',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) Navigator.pop(context);
+          });
+        }
+      } else {
+        // ✅ AUTHORIZED - LOAD STUDENTS
+        setState(() {
+          studentsFuture = EnrollmentController.getEnrollmentsByClass(
+            widget.kelasId,
+          );
+          isAuthorized = true;
+        });
+      }
+    } catch (e) {
+      print('Error checking authorization: $e');
+      setState(() {
+        isAuthorized = false;
+      });
+    }
   }
 
   void _filterStudents() {
@@ -133,196 +177,207 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
         ),
         centerTitle: true,
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: studentsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF6C4FD8)),
-            );
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.people_outline,
-                    size: 80,
-                    color: Colors.grey.withOpacity(0.3),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Belum ada siswa di kelas ini",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+      body: !isAuthorized
+          ? const Center(
+              child: Text(
+                'Anda tidak memiliki akses untuk halaman ini',
+                style: TextStyle(color: Colors.red),
               ),
-            );
-          }
+            )
+          : FutureBuilder<List<dynamic>>(
+              future: studentsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF6C4FD8)),
+                  );
+                }
 
-          allStudents = snapshot.data!;
-          if (filteredStudents.isEmpty &&
-              (searchQuery.isNotEmpty || filterStatus != 'Semua')) {
-            _filterStudents();
-          } else if (filteredStudents.isEmpty) {
-            filteredStudents = allStudents;
-          }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.people_outline,
+                          size: 80,
+                          color: Colors.grey.withOpacity(0.3),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "Belum ada siswa di kelas ini",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Search Bar
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: custom_search.SearchBar(
-                    hintText: "Cari siswa...",
-                    onChanged: (value) {
-                      searchQuery = value;
-                      _filterStudents();
-                    },
-                  ),
-                ),
+                allStudents = snapshot.data!;
+                if (filteredStudents.isEmpty &&
+                    (searchQuery.isNotEmpty || filterStatus != 'Semua')) {
+                  _filterStudents();
+                } else if (filteredStudents.isEmpty) {
+                  filteredStudents = allStudents;
+                }
 
-                // Status Filter
-                SizedBox(
-                  height: 45,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: statusOptions.length,
-                    itemBuilder: (context, index) {
-                      final status = statusOptions[index];
-                      final isSelected = filterStatus == status;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              filterStatus = status;
-                            });
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      // Search Bar
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: custom_search.SearchBar(
+                          hintText: "Cari siswa...",
+                          onChanged: (value) {
+                            searchQuery = value;
                             _filterStudents();
                           },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFF6C4FD8)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: isSelected
-                                  ? null
-                                  : Border.all(
-                                      color: Colors.grey.withOpacity(0.3),
-                                    ),
-                            ),
-                            child: Text(
-                              status,
-                              style: TextStyle(
-                                color: isSelected
-                                    ? Colors.white
-                                    : Colors.black87,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Results Info
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Menampilkan ${filteredStudents.length} siswa",
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
                         ),
                       ),
-                      // Tombol Reset
-                      if (searchQuery.isNotEmpty || filterStatus != 'Semua')
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              searchQuery = '';
-                              filterStatus = 'Semua';
-                              filteredStudents = allStudents;
-                            });
+
+                      // Status Filter
+                      SizedBox(
+                        height: 45,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: statusOptions.length,
+                          itemBuilder: (context, index) {
+                            final status = statusOptions[index];
+                            final isSelected = filterStatus == status;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    filterStatus = status;
+                                  });
+                                  _filterStudents();
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? const Color(0xFF6C4FD8)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: isSelected
+                                        ? null
+                                        : Border.all(
+                                            color: Colors.grey.withOpacity(0.3),
+                                          ),
+                                  ),
+                                  child: Text(
+                                    status,
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
                           },
-                          child: const Text(
-                            "Reset Filter",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF6C4FD8),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                         ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Results Info
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Menampilkan ${filteredStudents.length} siswa",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            // Tombol Reset
+                            if (searchQuery.isNotEmpty ||
+                                filterStatus != 'Semua')
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    searchQuery = '';
+                                    filterStatus = 'Semua';
+                                    filteredStudents = allStudents;
+                                  });
+                                },
+                                child: const Text(
+                                  "Reset Filter",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF6C4FD8),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Students List
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: filteredStudents.length,
+                          itemBuilder: (context, index) {
+                            final student = filteredStudents[index];
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: GestureDetector(
+                                onTap: () {
+                                  _showStudentDetailDialog(student);
+                                },
+                                child: StudentEnrollmentCard(
+                                  namaSiswa:
+                                      student['nama_siswa'] ??
+                                      'Siswa Tidak Diketahui',
+                                  statusEnrollment:
+                                      student['status'] ?? 'aktif',
+                                  nilaiProgress:
+                                      (student['nilai_progress'] ?? 0)
+                                          .toDouble(),
+                                  tanggalDaftar:
+                                      student['tanggal_daftar'] ??
+                                      'Tidak diketahui',
+                                  onRemove: () {
+                                    _removeStudent(student['id']);
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
                     ],
                   ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Students List
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: filteredStudents.length,
-                    itemBuilder: (context, index) {
-                      final student = filteredStudents[index];
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: GestureDetector(
-                          onTap: () {
-                            _showStudentDetailDialog(student);
-                          },
-                          child: StudentEnrollmentCard(
-                            namaSiswa:
-                                student['nama_siswa'] ??
-                                'Siswa Tidak Diketahui',
-                            statusEnrollment: student['status'] ?? 'aktif',
-                            nilaiProgress: (student['nilai_progress'] ?? 0)
-                                .toDouble(),
-                            tanggalDaftar:
-                                student['tanggal_daftar'] ?? 'Tidak diketahui',
-                            onRemove: () {
-                              _removeStudent(student['id']);
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-              ],
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 

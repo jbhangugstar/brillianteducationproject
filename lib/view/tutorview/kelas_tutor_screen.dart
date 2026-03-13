@@ -33,11 +33,11 @@ class _KelasTutorScreenState extends State<KelasTutorScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFB23AEE),
         elevation: 0,
         title: const Text(
-          "Kelas Saya",
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+          "Brilliant Education",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -255,13 +255,12 @@ class _KelasTutorScreenState extends State<KelasTutorScreen> {
                           backgroundColor: const Color(0xFF6C4FD8),
                         ),
                         child: const Text(
-                          "Kelola Siswa",
+                          "Kelola Kelas",
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
-
                     PopupMenuButton<String>(
                       onSelected: (value) {
                         if (value == "edit") {

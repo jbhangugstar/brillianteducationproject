@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 60),
 
-              Image.asset("assets/icons/logo_brilliant.png", height: 250),
+              Image.asset("assets/image/brilliantlogo.png", height: 300),
 
               const Text(
                 "Your Dreams Matter",

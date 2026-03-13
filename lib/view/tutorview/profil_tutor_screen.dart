@@ -1,5 +1,5 @@
 import 'package:brillianteducationproject/extension/navigator.dart';
-import 'package:brillianteducationproject/view/siswaview/login_screen.dart';
+import 'package:brillianteducationproject/view/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class ProfilTutorScreen extends StatefulWidget {
