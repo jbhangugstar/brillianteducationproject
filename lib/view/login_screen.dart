@@ -52,6 +52,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user.id != null) {
         await prefs.storingStudentId(user.id!);
       }
+      // simpan tutorId
+      if (user.id != null) {
+        await prefs.storingTutorId(user.id!);
+      }
 
       // SIMPAN EMAIL
       await prefs.storingUserEmail(user.email);

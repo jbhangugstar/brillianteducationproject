@@ -1,9 +1,9 @@
 import 'package:brillianteducationproject/view/siswaview/pembayaran_sukses.dart';
 import 'package:flutter/material.dart';
-import '../../models/kelas_model.dart';
-import '../../models/enrollment_model.dart';
-import '../../controller/enrollment_controller.dart';
-import '../../database/preference.dart';
+import 'package:brillianteducationproject/models/kelas_model.dart';
+import 'package:brillianteducationproject/models/enrollment_model.dart';
+import 'package:brillianteducationproject/controller/enrollment_controller.dart';
+import 'package:brillianteducationproject/database/preference.dart';
 
 class PembayaranScreen extends StatefulWidget {
   final Kelas kelas;

@@ -1,3 +1,4 @@
+import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/extension/navigator.dart';
 import 'package:brillianteducationproject/database/db_helper.dart';
 import 'package:brillianteducationproject/helper/role_helper.dart';
@@ -264,6 +265,11 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
                               content: Text('Registrasi berhasil!'),
                             ),
                           );
+                          final newUserId = await DBHelper.registerUser(user);
+
+                          final prefs = PreferenceHandler();
+                          await prefs.storingStudentId(newUserId);
+
                           context.pushAndRemoveAll(const SiswaMainScreen());
                         }
                       } catch (e) {

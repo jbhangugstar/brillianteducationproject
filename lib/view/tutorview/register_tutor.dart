@@ -1,3 +1,4 @@
+import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/extension/navigator.dart';
 import 'package:brillianteducationproject/database/db_helper.dart';
 import 'package:brillianteducationproject/helper/role_helper.dart';
@@ -260,13 +261,15 @@ class _RegistertutorScreenState extends State<RegistertutorScreen> {
                       );
 
                       try {
-                        await DBHelper.registerUser(user);
+                        final newUserId = await DBHelper.registerUser(user);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Registrasi berhasil!'),
                             ),
                           );
+                          final prefs = PreferenceHandler();
+                          await prefs.storingTutorId(newUserId);
                           context.pushAndRemoveAll(const TutorMainScreen());
                         }
                       } catch (e) {

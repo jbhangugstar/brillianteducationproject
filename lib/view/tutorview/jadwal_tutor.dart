@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:brillianteducationproject/database/preference.dart';
+import 'package:brillianteducationproject/extension/navigator.dart';
+import 'package:brillianteducationproject/view/tutorview/buat_kelas_baru.dart';
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
-import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/view/tutorview/manage_students_screen.dart';
+import 'package:flutter/material.dart';
 
 class JadwalTutorScreen extends StatefulWidget {
   const JadwalTutorScreen({super.key});
@@ -11,349 +14,330 @@ class JadwalTutorScreen extends StatefulWidget {
   State<JadwalTutorScreen> createState() => _JadwalTutorScreenState();
 }
 
-class _JadwalTutorScreenState extends State<JadwalTutorScreen>
-    with WidgetsBindingObserver {
-  List<Kelas> tutorClasses = [];
-  bool isLoading = true;
+class _JadwalTutorScreenState extends State<JadwalTutorScreen> {
+  Future<List<Kelas>>? kelasFuture;
+  int? tutorId;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _loadTutorClasses();
+    loadTutorKelas();
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _loadTutorClasses();
+  // ============================
+  // LOAD KELAS SESUAI TUTOR LOGIN
+  // ============================
+  Future<void> loadTutorKelas() async {
+    tutorId = await PreferenceHandler.getTutorId();
+    if (tutorId != null) {
+      setState(() {
+        kelasFuture = KelasController.getKelasByTutor(tutorId!);
+      });
     }
   }
 
-  Future<void> _loadTutorClasses() async {
-    setState(() => isLoading = true);
-
-    final tutorId = await PreferenceHandler.getTutorId();
-    if (tutorId == null) {
-      setState(() => isLoading = false);
-      return;
+  // ============================
+  // REFRESH DATA
+  // ============================
+  void _refreshKelas() {
+    if (tutorId != null) {
+      setState(() {
+        kelasFuture = KelasController.getKelasByTutor(tutorId!);
+      });
     }
-
-    final classes = await KelasController.getKelasByTutor(tutorId);
-    setState(() {
-      tutorClasses = classes;
-      isLoading = false;
-    });
-  }
-
-  Future<void> _refreshClasses() async {
-    await _loadTutorClasses();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
+
       appBar: AppBar(
         backgroundColor: const Color(0xFFB23AEE),
         elevation: 0,
         title: const Text(
-          "Brilliant Education",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          "Jadwal Tutor",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _refreshKelas,
+          ),
+        ],
       ),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF6C4FD8)),
-            )
-          : RefreshIndicator(
-              onRefresh: _refreshClasses,
-              color: const Color(0xFF6C4FD8),
-              child: tutorClasses.isEmpty
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.6,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.calendar_today_outlined,
-                                  size: 80,
-                                  color: Colors.grey.withOpacity(0.3),
+
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          context.push(const BuatKelasBaruScreen()).then((_) {
+            _refreshKelas();
+          });
+        },
+        backgroundColor: const Color(0xFF6C4FD8),
+        icon: const Icon(Icons.add),
+        label: const Text("Kelas Baru"),
+      ),
+
+      body: kelasFuture == null
+          ? const Center(child: CircularProgressIndicator())
+          : FutureBuilder<List<Kelas>>(
+              future: kelasFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF6C4FD8)),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("Belum ada kelas"));
+                }
+
+                final kelasList = snapshot.data!;
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: kelasList.length,
+                  itemBuilder: (context, index) {
+                    final kelas = kelasList[index];
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: kelasCard(
+                        context: context,
+                        kelas: kelas,
+                        onRefresh: _refreshKelas,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+    );
+  }
+
+  Widget kelasCard({
+    required BuildContext context,
+    required Kelas kelas,
+    required VoidCallback onRefresh,
+  }) {
+    final id = kelas.id ?? 0;
+    final title = kelas.namaKelas;
+    final price = 'Rp ${kelas.harga}';
+    final schedule = kelas.jadwal;
+    final students = '${kelas.jumlahSiswa ?? 0} siswa';
+    final kategori = kelas.kategori;
+    final status = kelas.status ?? 'aktif';
+
+    Color statusColor;
+
+    switch (status.toLowerCase()) {
+      case 'aktif':
+        statusColor = Colors.green;
+        break;
+      case 'selesai':
+        statusColor = Colors.blue;
+        break;
+      case 'batal':
+        statusColor = Colors.red;
+        break;
+      default:
+        statusColor = Colors.grey;
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 8,
+            color: Colors.black.withOpacity(0.08),
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// HEADER
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              color: Color(0xFF6C4FD8),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+
+                  child: Text(
+                    status,
+                    style: TextStyle(
+                      color: statusColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          /// GAMBAR
+          if (kelas.foto != null && kelas.foto!.isNotEmpty)
+            ClipRRect(
+              child: Image.file(
+                File(kelas.foto!),
+                width: double.infinity,
+                height: 180,
+                fit: BoxFit.cover,
+              ),
+            ),
+
+          Padding(
+            padding: const EdgeInsets.all(12),
+
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  price,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(schedule),
+
+                const SizedBox(height: 6),
+
+                Text(students),
+
+                const SizedBox(height: 12),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.push(
+                            ManageStudentsScreen(kelasId: id, namaKelas: title),
+                          );
+                        },
+
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6C4FD8),
+                        ),
+
+                        child: const Text(
+                          "Kelola Kelas",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 8),
+
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == "edit") {
+                          context
+                              .push(
+                                BuatKelasBaruScreen(
+                                  kelas: kelas,
+                                  kelasId: kelas.id,
                                 ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  "Belum ada kelas yang diajar",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                              )
+                              .then((_) => onRefresh());
+                        }
+
+                        if (value == "delete") {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text("Hapus Kelas"),
+                              content: const Text(
+                                "Apakah yakin ingin menghapus kelas ini?",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text("Batal"),
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  "Buat kelas di katalog untuk mulai mengajar",
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[500],
+
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
                                   ),
+
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+
+                                    if (kelas.id != null) {
+                                      await KelasController.deleteKelas(
+                                        kelas.id!,
+                                      );
+
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Kelas berhasil dihapus",
+                                          ),
+                                        ),
+                                      );
+
+                                      onRefresh();
+                                    }
+                                  },
+
+                                  child: const Text("Hapus"),
                                 ),
                               ],
                             ),
-                          ),
-                        ),
-                      ],
-                    )
-                  : SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(
-                              "Menampilkan ${tutorClasses.length} kelas",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            itemCount: tutorClasses.length,
-                            itemBuilder: (context, index) {
-                              final kelas = tutorClasses[index];
+                          );
+                        }
+                      },
 
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.08),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Header
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            colors: [
-                                              Color(0xFF6C4FD8),
-                                              Color(0xFF9966FF),
-                                            ],
-                                          ),
-                                          borderRadius:
-                                              const BorderRadius.vertical(
-                                                top: Radius.circular(16),
-                                              ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            if (kelas.kategori != null)
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 10,
-                                                      vertical: 4,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white
-                                                      .withOpacity(0.3),
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                ),
-                                                child: Text(
-                                                  kelas.kategori ?? '',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
-                                            if (kelas.rating != null)
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.star,
-                                                    color: Colors.yellow,
-                                                    size: 16,
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    kelas.rating.toString(),
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      // Content
-                                      Padding(
-                                        padding: const EdgeInsets.all(14),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              kelas.namaKelas,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black87,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.schedule,
-                                                  size: 16,
-                                                  color: Colors.grey,
-                                                ),
-                                                const SizedBox(width: 6),
-                                                Expanded(
-                                                  child: Text(
-                                                    kelas.jadwal,
-                                                    style: const TextStyle(
-                                                      fontSize: 13,
-                                                      color: Colors.grey,
-                                                    ),
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 12),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    const Text(
-                                                      'Harga',
-                                                      style: TextStyle(
-                                                        fontSize: 11,
-                                                        color: Colors.grey,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 2),
-                                                    Text(
-                                                      'Rp ${kelas.harga.toString()}',
-                                                      style: const TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Color(
-                                                          0xFF6C4FD8,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                ElevatedButton(
-                                                  onPressed: () {
-                                                    // Pindah ke halaman ManageStudentsScreen
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (_) =>
-                                                            ManageStudentsScreen(
-                                                              kelasId:
-                                                                  kelas.id ?? 0,
-                                                              namaKelas: kelas
-                                                                  .namaKelas,
-                                                            ),
-                                                      ),
-                                                    );
-                                                  },
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        const Color(0xFF6C4FD8),
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 16,
-                                                          vertical: 8,
-                                                        ),
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            20,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                  child: const Text(
-                                                    'Kelola Kelas',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                      itemBuilder: (context) => const [
+                        PopupMenuItem(value: "edit", child: Text("Edit")),
+                        PopupMenuItem(value: "delete", child: Text("Hapus")),
+                      ],
                     ),
+                  ],
+                ),
+              ],
             ),
+          ),
+        ],
+      ),
     );
   }
 }

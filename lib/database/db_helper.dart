@@ -158,9 +158,9 @@ class DBHelper {
   }
 
   // REGISTER USER
-  static Future<void> registerUser(UserModel user) async {
+  static Future<int> registerUser(UserModel user) async {
     final dbs = await db();
-    await dbs.insert('user', user.toMap());
+    return await dbs.insert('user', user.toMap());
   }
 
   // LOGIN USER

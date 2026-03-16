@@ -14,6 +14,7 @@ class PreferenceHandler {
   static const String _isLogin = 'isLogin';
   static const String _studentId = 'studentId';
   static const String _userEmail = 'userEmail';
+  static const String _tutorId = 'tutorId';
 
   //CREATE - Store Login Status
   Future<void> storingIsLogin(bool isLogin) async {
@@ -23,6 +24,11 @@ class PreferenceHandler {
   //CREATE - Store Student ID
   Future<void> storingStudentId(int id) async {
     _preferences.setInt(_studentId, id);
+  }
+
+  //CREATE - Store Tutor ID
+  Future<void> storingTutorId(int id) async {
+    _preferences.setInt(_tutorId, id);
   }
 
   //CREATE - Store User Email
@@ -63,7 +69,8 @@ class PreferenceHandler {
   // ========================
   static Future<int?> getTutorId() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('tutor_id'); // pastikan key sesuai saat login tutor
+    var data = prefs.getInt(_tutorId);
+    return data;
   }
 
   // ========================
@@ -71,6 +78,6 @@ class PreferenceHandler {
   // ========================
   static Future<void> setTutorId(int id) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('tutor_id', id);
+    await prefs.setInt(_tutorId, id);
   }
 }
