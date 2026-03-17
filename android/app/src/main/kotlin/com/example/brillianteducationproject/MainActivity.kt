@@ -1,4 +1,4 @@
-package com.example.brillianteducationproject
+package com.ppkd.brillianteducation
 
 import io.flutter.embedding.android.FlutterActivity
 
