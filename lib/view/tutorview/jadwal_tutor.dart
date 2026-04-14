@@ -16,7 +16,7 @@ class JadwalTutorScreen extends StatefulWidget {
 
 class _JadwalTutorScreenState extends State<JadwalTutorScreen> {
   Future<List<Kelas>>? kelasFuture;
-  int? tutorId;
+  String? tutorId;
 
   @override
   void initState() {

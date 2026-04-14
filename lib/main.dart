@@ -1,13 +1,14 @@
 import 'package:brillianteducationproject/database/preference.dart';
-import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
+import 'package:brillianteducationproject/firebase_options.dart';
+import 'package:brillianteducationproject/view/login_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   final prefs = PreferenceHandler();
   await prefs.init();
-
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: TutorMainScreen(),
+      home: LoginScreen(),
     );
   }
 }

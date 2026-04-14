@@ -1,5 +1,5 @@
 import 'package:brillianteducationproject/extension/navigator.dart';
-import 'package:brillianteducationproject/database/db_helper.dart';
+import 'package:brillianteducationproject/service/firebase_service.dart';
 import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/helper/role_helper.dart';
 import 'package:brillianteducationproject/view/register_option.dart';
@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final user = await DBHelper.loginuser(
+    final user = await FirebaseService.loginUser(
       email: emailController.text,
       password: passwordController.text,
     );

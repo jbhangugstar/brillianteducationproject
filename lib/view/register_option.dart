@@ -95,7 +95,7 @@ class RegisteroptionScreen extends StatelessWidget {
               SizedBox(height: 50),
 
               ElevatedButton(
-                child: const Text("Kembali ke Login"),
+                child: const Text("Kembali"),
                 onPressed: () {
                   context.push((LoginScreen()));
                 },

@@ -14,7 +14,7 @@ class BuatKelasStep2Screen extends StatefulWidget {
   final String deskripsi;
   final String gambar;
   final int? kelasId;
-  final int? tutorId; // ⭐ tutorId ditambahkan
+  final String? tutorId; // ⭐ tutorId ditambahkan
 
   const BuatKelasStep2Screen({
     super.key,

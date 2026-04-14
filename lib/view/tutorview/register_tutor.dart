@@ -1,6 +1,6 @@
 import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/extension/navigator.dart';
-import 'package:brillianteducationproject/database/db_helper.dart';
+import 'package:brillianteducationproject/service/firebase_service.dart';
 import 'package:brillianteducationproject/helper/role_helper.dart';
 import 'package:brillianteducationproject/models/user_model.dart';
 import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
@@ -261,7 +261,7 @@ class _RegistertutorScreenState extends State<RegistertutorScreen> {
                       );
 
                       try {
-                        final newUserId = await DBHelper.registerUser(user);
+                        final registeredUser = await FirebaseService.registerUser(user);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -269,7 +269,9 @@ class _RegistertutorScreenState extends State<RegistertutorScreen> {
                             ),
                           );
                           final prefs = PreferenceHandler();
-                          await prefs.storingTutorId(newUserId);
+                          if (registeredUser.id != null) {
+                            await prefs.storingTutorId(registeredUser.id!);
+                          }
                           context.pushAndRemoveAll(const TutorMainScreen());
                         }
                       } catch (e) {

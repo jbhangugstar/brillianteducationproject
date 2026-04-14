@@ -1,6 +1,6 @@
 class EnrollmentModel {
   final int? id;
-  final int idSiswa;
+  final String idSiswa;
   final int idKelas;
   final String namaSiswa;
   final String namaKelas;

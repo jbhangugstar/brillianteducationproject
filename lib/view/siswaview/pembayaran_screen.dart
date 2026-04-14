@@ -29,7 +29,7 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
       );
       return;
     }
-    final studentId = await PreferenceHandler.getStudentId() ?? 0;
+    final studentId = await PreferenceHandler.getStudentId() ?? '';
 
     final enrollment = EnrollmentModel(
       idSiswa: studentId,

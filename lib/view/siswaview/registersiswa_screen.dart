@@ -1,6 +1,6 @@
 import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/extension/navigator.dart';
-import 'package:brillianteducationproject/database/db_helper.dart';
+import 'package:brillianteducationproject/service/firebase_service.dart';
 import 'package:brillianteducationproject/helper/role_helper.dart';
 import 'package:brillianteducationproject/models/user_model.dart';
 import 'package:brillianteducationproject/view/siswaview/siswa_main_screen.dart';
@@ -258,17 +258,18 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
                       );
 
                       try {
-                        await DBHelper.registerUser(user);
+                        final registeredUser = await FirebaseService.registerUser(user);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Registrasi berhasil!'),
                             ),
                           );
-                          final newUserId = await DBHelper.registerUser(user);
 
                           final prefs = PreferenceHandler();
-                          await prefs.storingStudentId(newUserId);
+                          if (registeredUser.id != null) {
+                            await prefs.storingStudentId(registeredUser.id!);
+                          }
 
                           context.pushAndRemoveAll(const SiswaMainScreen());
                         }

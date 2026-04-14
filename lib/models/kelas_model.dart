@@ -9,7 +9,7 @@ class Kelas {
   String? kategori;
   int? durasi;
   String? tingkatKesukaran;
-  int? idTutor;
+  String? idTutor;
   int? jumlahSiswa;
   double? rating;
   String? status;
@@ -45,7 +45,7 @@ class Kelas {
     String? kategori,
     int? durasi,
     String? tingkatKesukaran,
-    int? idTutor,
+    String? idTutor,
     int? jumlahSiswa,
     double? rating,
     String? status,

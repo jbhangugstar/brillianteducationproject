@@ -2,7 +2,7 @@ import 'dart:convert';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class UserModel {
-  final int? id;
+  final String? id;
   final String email;
   final String password;
   final String? role;
@@ -30,7 +30,7 @@ class UserModel {
   // Create UserModel from Map (database retrieval)
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id'] != null ? map['id'] as int : null,
+      id: map['id'] != null ? map['id'] as String : null,
       email: map['email'] as String,
       password: map['password'] as String,
       role: map['role'] != null ? map['role'] as String : null,

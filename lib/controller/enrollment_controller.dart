@@ -19,7 +19,7 @@ class EnrollmentController {
 
   // READ ENROLLMENTS BY STUDENT
   static Future<List<EnrollmentModel>> getEnrollmentsByStudent(
-    int siswaId,
+    String siswaId,
   ) async {
     final db = await DBHelper.db();
     final result = await db.query(
@@ -44,7 +44,7 @@ class EnrollmentController {
   }
 
   // CHECK IF STUDENT ALREADY ENROLLED
-  static Future<bool> isStudentEnrolled(int siswaId, int kelasId) async {
+  static Future<bool> isStudentEnrolled(String siswaId, int kelasId) async {
     final db = await DBHelper.db();
     final result = await db.query(
       'enrollment',
@@ -123,7 +123,7 @@ class EnrollmentController {
   }
 
   // GET ENROLLED CLASSES WITH FULL DETAILS FOR STUDENT
-  static Future<List<Kelas>> getEnrolledClassesByStudent(int siswaId) async {
+  static Future<List<Kelas>> getEnrolledClassesByStudent(String siswaId) async {
     final db = await DBHelper.db();
 
     final result = await db.rawQuery(

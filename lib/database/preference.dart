@@ -22,13 +22,13 @@ class PreferenceHandler {
   }
 
   //CREATE - Store Student ID
-  Future<void> storingStudentId(int id) async {
-    _preferences.setInt(_studentId, id);
+  Future<void> storingStudentId(String id) async {
+    _preferences.setString(_studentId, id);
   }
 
   //CREATE - Store Tutor ID
-  Future<void> storingTutorId(int id) async {
-    _preferences.setInt(_tutorId, id);
+  Future<void> storingTutorId(String id) async {
+    _preferences.setString(_tutorId, id);
   }
 
   //CREATE - Store User Email
@@ -44,9 +44,9 @@ class PreferenceHandler {
   }
 
   //GET - Student ID
-  static Future<int?> getStudentId() async {
+  static Future<String?> getStudentId() async {
     final prefs = await SharedPreferences.getInstance();
-    var data = prefs.getInt(_studentId);
+    var data = prefs.getString(_studentId);
     return data;
   }
 
@@ -67,17 +67,17 @@ class PreferenceHandler {
   // ========================
   // GET TUTOR ID
   // ========================
-  static Future<int?> getTutorId() async {
+  static Future<String?> getTutorId() async {
     final prefs = await SharedPreferences.getInstance();
-    var data = prefs.getInt(_tutorId);
+    var data = prefs.getString(_tutorId);
     return data;
   }
 
   // ========================
   // SET TUTOR ID (misal saat login)
   // ========================
-  static Future<void> setTutorId(int id) async {
+  static Future<void> setTutorId(String id) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_tutorId, id);
+    await prefs.setString(_tutorId, id);
   }
 }

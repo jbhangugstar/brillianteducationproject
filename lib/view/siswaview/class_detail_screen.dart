@@ -33,7 +33,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
   }
 
   Future<void> daftarKelas(dynamic kelas) async {
-    int? studentId = await PreferenceHandler.getStudentId();
+    String? studentId = await PreferenceHandler.getStudentId();
 
     if (studentId == null) {
       if (!mounted) return;

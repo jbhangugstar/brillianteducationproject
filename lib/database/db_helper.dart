@@ -32,7 +32,7 @@ class DBHelper {
           pendidikan TEXT,
           pengalaman TEXT,
           keahlian TEXT,
-          id_user INTEGER
+          id_user TEXT
         )
         ''');
 
@@ -54,7 +54,7 @@ class DBHelper {
           kategori TEXT,
           durasi INTEGER,
           tingkat_kesukaran TEXT,
-          id_tutor INTEGER,
+          id_tutor TEXT,
           jumlah_siswa INTEGER DEFAULT 0,
           rating REAL,
           status TEXT DEFAULT 'aktif',
@@ -66,7 +66,7 @@ class DBHelper {
         await db.execute('''
         CREATE TABLE enrollment (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          id_siswa INTEGER NOT NULL,
+          id_siswa TEXT NOT NULL,
           id_kelas INTEGER NOT NULL,
           nama_siswa TEXT,
           nama_kelas TEXT,
@@ -77,7 +77,7 @@ class DBHelper {
         ''');
         print('    ✅ Tables created!');
       },
-      version: 10,
+      version: 11,
       onUpgrade: (db, oldVersion, newVersion) async {
         print('    🔄 Upgrading from v$oldVersion to v$newVersion...');
         try {
@@ -108,7 +108,7 @@ class DBHelper {
             pendidikan TEXT,
             pengalaman TEXT,
             keahlian TEXT,
-            id_user INTEGER
+            id_user TEXT
           )
           ''');
 
@@ -128,7 +128,7 @@ class DBHelper {
             kategori TEXT,
             durasi INTEGER,
             tingkat_kesukaran TEXT,
-            id_tutor INTEGER,
+            id_tutor TEXT,
             jumlah_siswa INTEGER DEFAULT 0,
             rating REAL,
             status TEXT DEFAULT 'aktif',
@@ -139,7 +139,7 @@ class DBHelper {
           await db.execute('''
           CREATE TABLE enrollment (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            id_siswa INTEGER NOT NULL,
+            id_siswa TEXT NOT NULL,
             id_kelas INTEGER NOT NULL,
             nama_siswa TEXT,
             nama_kelas TEXT,
@@ -157,29 +157,7 @@ class DBHelper {
     );
   }
 
-  // REGISTER USER
-  static Future<int> registerUser(UserModel user) async {
-    final dbs = await db();
-    return await dbs.insert('user', user.toMap());
-  }
 
-  // LOGIN USER
-  static Future<UserModel?> loginuser({
-    required String email,
-    required String password,
-  }) async {
-    final dbs = await db();
-    final List<Map<String, dynamic>> results = await dbs.query(
-      "user",
-      where: 'email = ? AND password = ?',
-      whereArgs: [email, password],
-    );
-
-    if (results.isNotEmpty) {
-      return UserModel.fromMap(results.first);
-    }
-    return null;
-  }
 
   // menampilkan kelas
   Future<List<Map<String, dynamic>>> getAllKelas() async {
@@ -212,7 +190,7 @@ class DBHelper {
   }
 
   // Get all classes for a tutor
-  Future<List<Map<String, dynamic>>> getKelasByTutor(int tutorId) async {
+  Future<List<Map<String, dynamic>>> getKelasByTutor(String tutorId) async {
     final dbs = await db();
     return await dbs.query(
       'kelas',

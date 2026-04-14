@@ -95,7 +95,7 @@ class KelasController {
   // ===============================
   // READ KELAS BY TUTOR
   // ===============================
-  static Future<List<Kelas>> getKelasByTutor(int tutorId) async {
+  static Future<List<Kelas>> getKelasByTutor(String tutorId) async {
     try {
       final db = await DBHelper.db();
 
