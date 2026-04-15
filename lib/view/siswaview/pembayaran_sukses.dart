@@ -3,7 +3,14 @@ import 'package:brillianteducationproject/view/siswaview/siswa_main_screen.dart'
 import 'package:flutter/material.dart';
 
 class PembayaranSuksesPage extends StatelessWidget {
-  const PembayaranSuksesPage({super.key});
+  final int totalPembayaran;
+  final String metodePembayaran;
+  
+  const PembayaranSuksesPage({
+    super.key, 
+    required this.totalPembayaran,
+    required this.metodePembayaran,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,16 +22,16 @@ class PembayaranSuksesPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.check_circle, color: Colors.green, size: 120),
+              const Icon(Icons.check_circle, color: Colors.green, size: 120),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              Text(
+              const Text(
                 "Pembayaran Berhasil!",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
 
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
 
               Text(
                 "Terima kasih, pembayaran kelas kamu telah berhasil diproses.",
@@ -32,38 +39,38 @@ class PembayaranSuksesPage extends StatelessWidget {
                 style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
 
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
 
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
                   children: [
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Status"),
                         Text("Sukses", style: TextStyle(color: Colors.green)),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [Text("Metode Pembayaran"), Text("E-Wallet")],
+                      children: [const Text("Metode Pembayaran"), Text(metodePembayaran)],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Total"),
+                        const Text("Total"),
                         Text(
-                          "Rp 250000",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          "Rp $totalPembayaran",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -71,22 +78,22 @@ class PembayaranSuksesPage extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
 
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
                   onPressed: () {
-                    context.pushAndRemoveAll(SiswaMainScreen());
+                    context.pushAndRemoveAll(const SiswaMainScreen());
                   },
-                  child: Text("Kembali", style: TextStyle(fontSize: 16)),
+                  child: const Text("Kembali", style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],

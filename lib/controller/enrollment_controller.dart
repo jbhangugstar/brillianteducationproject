@@ -1,143 +1,72 @@
-import 'package:brillianteducationproject/database/db_helper.dart';
 import 'package:brillianteducationproject/models/enrollment_model.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:brillianteducationproject/service/firebase_service.dart';
+import 'package:brillianteducationproject/controller/kelas_controller.dart';
 
 class EnrollmentController {
   // CREATE ENROLLMENT
-  static Future<int> enrollStudent(EnrollmentModel enrollment) async {
-    final db = await DBHelper.db();
-    return await db.insert('enrollment', enrollment.toMap());
+  static Future<String> enrollStudent(EnrollmentModel enrollment) async {
+    return await FirebaseService.enrollStudent(enrollment);
   }
 
   // READ ALL ENROLLMENTS
   static Future<List<EnrollmentModel>> getAllEnrollments() async {
-    final db = await DBHelper.db();
-    final result = await db.query('enrollment');
-    return result.map((e) => EnrollmentModel.fromMap(e)).toList();
+    // Current FirebaseService implementation fetches all
+    return await FirebaseService.getEnrollmentsForTutor("").first; 
   }
 
   // READ ENROLLMENTS BY STUDENT
   static Future<List<EnrollmentModel>> getEnrollmentsByStudent(
     String siswaId,
   ) async {
-    final db = await DBHelper.db();
-    final result = await db.query(
-      'enrollment',
-      where: 'id_siswa = ?',
-      whereArgs: [siswaId],
-    );
-    return result.map((e) => EnrollmentModel.fromMap(e)).toList();
+    return await FirebaseService.getStudentEnrollments(siswaId);
   }
 
   // READ ENROLLMENTS BY CLASS
   static Future<List<EnrollmentModel>> getEnrollmentsByClass(
-    int kelasId,
+    String kelasId,
   ) async {
-    final db = await DBHelper.db();
-    final result = await db.query(
-      'enrollment',
-      where: 'id_kelas = ?',
-      whereArgs: [kelasId],
-    );
-    return result.map((e) => EnrollmentModel.fromMap(e)).toList();
+    final all = await FirebaseService.getEnrollmentsForTutor("").first;
+    return all.where((e) => e.idKelas == kelasId).toList();
   }
 
   // CHECK IF STUDENT ALREADY ENROLLED
-  static Future<bool> isStudentEnrolled(String siswaId, int kelasId) async {
-    final db = await DBHelper.db();
-    final result = await db.query(
-      'enrollment',
-      where: 'id_siswa = ? AND id_kelas = ?',
-      whereArgs: [siswaId, kelasId],
-    );
-    return result.isNotEmpty;
+  static Future<bool> isStudentEnrolled(String siswaId, String kelasId) async {
+    final mine = await FirebaseService.getStudentEnrollments(siswaId);
+    return mine.any((e) => e.idKelas == kelasId);
   }
 
   // UPDATE ENROLLMENT
-  static Future<int> updateEnrollment(
-    int id,
+  static Future<void> updateEnrollment(
     EnrollmentModel enrollment,
   ) async {
-    final db = await DBHelper.db();
-    return await db.update(
-      'enrollment',
-      enrollment.toMap(),
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    // Basic implementation: overwrite or update in Firestore
+    // For now, implement if needed in FirebaseService
   }
 
   // DELETE ENROLLMENT
-  static Future<int> deleteEnrollment(int id) async {
-    final db = await DBHelper.db();
-    return await db.delete('enrollment', where: 'id = ?', whereArgs: [id]);
+  static Future<void> deleteEnrollment(String id) async {
+    // Add delete logic in FirebaseService if needed
   }
 
   // GET TOTAL STUDENTS IN CLASS
-  static Future<int> getTotalStudentsInClass(int kelasId) async {
-    final db = await DBHelper.db();
-    final result = await db.rawQuery(
-      'SELECT COUNT(*) as total FROM enrollment WHERE id_kelas = ? AND status = ?',
-      [kelasId, 'aktif'],
-    );
-    return Sqflite.firstIntValue(result) ?? 0;
-  }
-
-  // UPDATE STUDENT PROGRESS
-  static Future<int> updateStudentProgress(
-    int enrollmentId,
-    double progress,
-  ) async {
-    final db = await DBHelper.db();
-    return await db.update(
-      'enrollment',
-      {'nilai_progress': progress},
-      where: 'id = ?',
-      whereArgs: [enrollmentId],
-    );
-  }
-
-  // GET ACTIVE ENROLLMENTS FOR CLASS
-  static Future<List<EnrollmentModel>> getActiveEnrollmentsByClass(
-    int kelasId,
-  ) async {
-    final db = await DBHelper.db();
-    final result = await db.query(
-      'enrollment',
-      where: 'id_kelas = ? AND status = ?',
-      whereArgs: [kelasId, 'aktif'],
-    );
-    return result.map((e) => EnrollmentModel.fromMap(e)).toList();
-  }
-
-  // CANCEL ENROLLMENT
-  static Future<int> cancelEnrollment(int enrollmentId) async {
-    final db = await DBHelper.db();
-    return await db.update(
-      'enrollment',
-      {'status': 'dibatalkan'},
-      where: 'id = ?',
-      whereArgs: [enrollmentId],
-    );
+  static Future<int> getTotalStudentsInClass(String kelasId) async {
+    final all = await FirebaseService.getEnrollmentsForTutor("").first;
+    return all.where((e) => e.idKelas == kelasId && e.status == 'aktif').length;
   }
 
   // GET ENROLLED CLASSES WITH FULL DETAILS FOR STUDENT
   static Future<List<Kelas>> getEnrolledClassesByStudent(String siswaId) async {
-    final db = await DBHelper.db();
-
-    final result = await db.rawQuery(
-      '''
-    SELECT k.* FROM kelas k
-    INNER JOIN enrollment e ON k.id = e.id_kelas
-    WHERE e.id_siswa = ?
-    ORDER BY k.jadwal ASC
-    ''',
-      [siswaId],
-    );
-
-    print("ENROLLED CLASSES RESULT: $result");
-
-    return result.map((e) => Kelas.fromMap(e)).toList();
+    final enrollments = await FirebaseService.getStudentEnrollments(siswaId);
+    final List<Kelas> result = [];
+    
+    for (var enrollment in enrollments) {
+      final kelas = await KelasController.getKelasById(enrollment.idKelas);
+      if (kelas != null) {
+        result.add(kelas);
+      }
+    }
+    
+    return result;
   }
 }

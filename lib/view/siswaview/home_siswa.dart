@@ -1,8 +1,34 @@
+import 'package:brillianteducationproject/controller/kelas_controller.dart';
+import 'package:brillianteducationproject/models/kelas_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class HomeSiswaScreen extends StatelessWidget {
+class HomeSiswaScreen extends StatefulWidget {
   const HomeSiswaScreen({super.key});
+
+  @override
+  State<HomeSiswaScreen> createState() => _HomeSiswaScreenState();
+}
+
+class _HomeSiswaScreenState extends State<HomeSiswaScreen> {
+  late Future<List<Kelas>> _kelasFuture;
+  String _searchKeyword = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _kelasFuture = KelasController.getAllKelas();
+  }
+
+  void _refreshData() {
+    setState(() {
+      if (_searchKeyword.isEmpty) {
+        _kelasFuture = KelasController.getAllKelas();
+      } else {
+        _kelasFuture = KelasController.searchKelas(_searchKeyword);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +60,9 @@ class HomeSiswaScreen extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
+          child: RefreshIndicator(
+            onRefresh: () async => _refreshData(),
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,11 +71,15 @@ class HomeSiswaScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
+                      color: Colors.white.withOpacity(0.9),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const TextField(
-                      decoration: InputDecoration(
+                    child: TextField(
+                      onChanged: (value) {
+                        _searchKeyword = value;
+                        _refreshData();
+                      },
+                      decoration: const InputDecoration(
                         icon: Icon(Icons.search),
                         hintText: "Cari mata pelajaran",
                         border: InputBorder.none,
@@ -117,47 +148,59 @@ class HomeSiswaScreen extends StatelessWidget {
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       CategoryItem(
                         icon: Icons.menu_book,
                         label: "Matematika",
-                        color: Color(0xffEAD9FF),
+                        color: const Color(0xffEAD9FF),
+                        onTap: () {
+                          setState(() {
+                            _kelasFuture =
+                                KelasController.getKelasByKategori("Matematika");
+                          });
+                        },
                       ),
                       CategoryItem(
                         icon: Icons.language,
-                        label: "Bahasa Inggris",
-                        color: Color(0xffD9E7FF),
+                        label: "Bahasa",
+                        color: const Color(0xffD9E7FF),
+                        onTap: () {
+                          setState(() {
+                            _kelasFuture =
+                                KelasController.getKelasByKategori("Bahasa");
+                          });
+                        },
                       ),
                       CategoryItem(
                         icon: Icons.science,
-                        label: "IPA",
-                        color: Color(0xffD9FFE4),
+                        label: "Sains",
+                        color: const Color(0xffD9FFE4),
+                        onTap: () {
+                          setState(() {
+                            _kelasFuture =
+                                KelasController.getKelasByKategori("Sains");
+                          });
+                        },
                       ),
                       CategoryItem(
-                        icon: Icons.location_on,
-                        label: "IPS",
-                        color: Color(0xffFFE8CC),
+                        icon: Icons.all_inclusive,
+                        label: "Semua",
+                        color: const Color(0xffFFE8CC),
+                        onTap: () => _refreshData(),
                       ),
                     ],
                   ),
 
                   const SizedBox(height: 30),
 
-                  /// TUTOR POPULER
-                  Row(
+                  /// DAFTAR KELAS
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text(
-                        "Tutor Populer",
+                        "Kelas Tersedia",
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "Lihat Semua",
-                        style: TextStyle(
-                          color: Colors.purple,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -166,35 +209,37 @@ class HomeSiswaScreen extends StatelessWidget {
 
                   const SizedBox(height: 15),
 
-                  TutorCard(
-                    name: "Bu Keishya Wijaya",
-                    subject: "Matematika",
-                    rating: "4.9",
-                    reviews: "127",
-                    foto:
-                        "https://avatars.preply.com/i/logos/i/logos/avatar_facvevr7sw.jpg",
-                  ),
+                  FutureBuilder<List<Kelas>>(
+                    future: _kelasFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                  const SizedBox(height: 12),
+                      if (snapshot.hasError) {
+                        return Center(child: Text("Error: ${snapshot.error}"));
+                      }
 
-                  TutorCard(
-                    name: "Pak Ahmad Rizki",
-                    subject: "Bahasa Inggris",
-                    rating: "4.8",
-                    reviews: "95",
-                    foto:
-                        "https://www.quipper.com/id/blog/wp-content/uploads/2022/12/pexels-yan-krukov-8617763.jpg",
-                  ),
+                      final kelasList = snapshot.data ?? [];
 
-                  const SizedBox(height: 12),
+                      if (kelasList.isEmpty) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20),
+                            child: Text("Tidak ada kelas ditemukan"),
+                          ),
+                        );
+                      }
 
-                  TutorCard(
-                    name: "Bu Maria Olivia",
-                    subject: "Bahasa Korea",
-                    rating: "4.8",
-                    reviews: "95",
-                    foto:
-                        "https://akcdn.detik.net.id/visual/2025/12/19/ilustrasi-awet-muda-1766148279919_11.jpeg?w=720&q=90",
+                      return Column(
+                        children: kelasList
+                            .map((kelas) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: KelasCard(kelas: kelas),
+                                ))
+                            .toList(),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -210,48 +255,45 @@ class CategoryItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
+  final VoidCallback onTap;
 
   const CategoryItem({
     super.key,
     required this.icon,
     required this.label,
     required this.color,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          height: 60,
-          width: 60,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(16),
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: Colors.purple),
           ),
-          child: Icon(icon, color: Colors.purple),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 12)),
-      ],
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
     );
   }
 }
 
-class TutorCard extends StatelessWidget {
-  final String name;
-  final String subject;
-  final String rating;
-  final String reviews;
-  final String foto;
+class KelasCard extends StatelessWidget {
+  final Kelas kelas;
 
-  const TutorCard({
+  const KelasCard({
     super.key,
-    required this.name,
-    required this.subject,
-    required this.rating,
-    required this.reviews,
-    required this.foto,
+    required this.kelas,
   });
 
   @override
@@ -262,33 +304,50 @@ class TutorCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(color: Colors.grey.withValues(alpha: 0.2), blurRadius: 8),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Row(
         children: [
-          CircleAvatar(radius: 28, backgroundImage: NetworkImage(foto)),
-
+          Container(
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              color: Colors.purple.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.book, color: Colors.purple, size: 30),
+          ),
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(subject),
-
+                Text(
+                  kelas.namaKelas,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "Rp ${kelas.harga}",
+                  style: const TextStyle(color: Colors.purple, fontSize: 13),
+                ),
                 Row(
                   children: [
-                    const Icon(Icons.star, color: Colors.orange, size: 16),
+                    const Icon(Icons.star, color: Colors.orange, size: 14),
                     const SizedBox(width: 4),
-                    Text("$rating ($reviews)"),
+                    Text(
+                      "${kelas.rating ?? 0} (${kelas.jumlahSiswa ?? 0} Siswa)",
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFB23AEE),
@@ -296,12 +355,14 @@ class TutorCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              // Navigation to detail class logic
+            },
             child: const Text(
-              "Book",
+              "Detail",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: CupertinoColors.extraLightBackgroundGray,
+                color: Colors.white,
               ),
             ),
           ),

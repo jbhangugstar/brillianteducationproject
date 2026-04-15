@@ -11,7 +11,7 @@ class SearchBar extends StatefulWidget {
   final VoidCallback? onSuffixPressed;
 
   const SearchBar({
-    Key? key,
+    super.key,
     this.hintText = "Cari...",
     required this.onChanged,
     this.onSubmitted,
@@ -20,7 +20,7 @@ class SearchBar extends StatefulWidget {
     this.prefixIcon = Icons.search,
     this.suffixIcon,
     this.onSuffixPressed,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchBar> createState() => _SearchBarState();

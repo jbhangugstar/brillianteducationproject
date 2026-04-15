@@ -1,0 +1,55 @@
+﻿Analyzing brillianteducationproject...                          
+
+warning - The include file 'package:flutter_lints/flutter.yaml' in 'D:\Brilliant Education App\brillianteducationproject\analysis_options.yaml' can't be found when analyzing 'D:\Brilliant Education App\brillianteducationproject' - analysis_options.yaml:10:10 - include_file_not_found
+  error - The method 'toDouble' can't be unconditionally invoked because the receiver can be 'null' - lib\view\siswaview\class_detail_screen.dart:275:67 - unchecked_use_of_nullable_value
+   info - The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' - lib\view\siswaview\home_siswa.dart:3:8 - unnecessary_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\siswaview\home_siswa.dart:74:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\siswaview\home_siswa.dart:308:33 - deprecated_member_use
+warning - Unused import: 'package:brillianteducationproject/database/preference.dart' - lib\view\siswaview\jadwal_siswa.dart:4:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\siswaview\jadwal_siswa.dart:109:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\siswaview\kelas_siswa_screen.dart:151:61 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\view\siswaview\pembayaran_screen.dart:253:7 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\view\siswaview\pembayaran_screen.dart:255:7 - deprecated_member_use
+   info - The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' - lib\view\siswaview\profil_siswa_screen.dart:8:8 - unnecessary_import
+  error - Target of URI doesn't exist: 'package:intl/intl.dart' - lib\view\siswaview\riwayat_pembayaran.dart:5:8 - uri_does_not_exist
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\siswaview\riwayat_pembayaran.dart:85:74 - deprecated_member_use
+  error - The method 'DateFormat' isn't defined for the type '_RiwayatPembayaranScreenState' - lib\view\siswaview\riwayat_pembayaran.dart:101:25 - undefined_method
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\view\tutorview\buat_kelas_baru.dart:262:15 - deprecated_member_use
+warning - Unused import: 'package:brillianteducationproject/view/tutorview/buat_kelas_baru.dart' - lib\view\tutorview\buat_kelas_baru2.dart:4:8 - unused_import
+  error - The argument type 'String' can't be assigned to the parameter type 'Kelas'.  - lib\view\tutorview\buat_kelas_baru2.dart:71:43 - argument_type_not_assignable
+  error - Too many positional arguments: 1 expected, but 2 found - lib\view\tutorview\buat_kelas_baru2.dart:71:60 - extra_positional_arguments
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\tutorview\buat_kelas_baru2.dart:147:41 - deprecated_member_use
+warning - Unused import: 'package:brillianteducationproject/service/firebase_service.dart' - lib\view\tutorview\home_tutor.dart:4:8 - unused_import
+  error - The method 'substring' can't be unconditionally invoked because the receiver can be 'null' - lib\view\tutorview\home_tutor.dart:211:55 - unchecked_use_of_nullable_value
+warning - Dead code - lib\view\tutorview\home_tutor.dart:214:54 - dead_code
+warning - The left operand can't be null, so the right operand is never executed - lib\view\tutorview\home_tutor.dart:214:57 - dead_null_aware_expression
+warning - Unused import: 'package:brillianteducationproject/database/preference.dart' - lib\view\tutorview\jadwal_tutor.dart:2:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\tutorview\jadwal_tutor.dart:124:67 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\tutorview\jadwal_tutor.dart:213:44 - deprecated_member_use
+warning - Dead code - lib\view\tutorview\kelas_tutor_screen.dart:81:31 - dead_code
+warning - The left operand can't be null, so the right operand is never executed - lib\view\tutorview\kelas_tutor_screen.dart:81:34 - dead_null_aware_expression
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\tutorview\kelas_tutor_screen.dart:111:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\tutorview\kelas_tutor_screen.dart:146:40 - deprecated_member_use
+warning - Unused import: 'package:brillianteducationproject/controller/kelas_controller.dart' - lib\view\tutorview\manage_students_screen.dart:3:8 - unused_import
+warning - Unused import: 'package:firebase_auth/firebase_auth.dart' - lib\view\tutorview\manage_students_screen.dart:5:8 - unused_import
+  error - Target of URI doesn't exist: 'package:intl/intl.dart' - lib\view\tutorview\manage_students_screen.dart:6:8 - uri_does_not_exist
+  error - The getter 'emailSiswa' isn't defined for the type 'EnrollmentModel' - lib\view\tutorview\manage_students_screen.dart:55:24 - undefined_getter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\tutorview\manage_students_screen.dart:191:60 - deprecated_member_use
+  error - The method 'DateFormat' isn't defined for the type '_ManageStudentsScreenState' - lib\view\tutorview\manage_students_screen.dart:211:23 - undefined_method
+  error - The getter 'emailSiswa' isn't defined for the type 'EnrollmentModel' - lib\view\tutorview\manage_students_screen.dart:235:29 - undefined_getter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\view\tutorview\manage_students_screen.dart:279:67 - deprecated_member_use
+warning - Dead code - lib\view\tutorview\profil_tutor_screen.dart:329:53 - dead_code
+warning - The left operand can't be null, so the right operand is never executed - lib\view\tutorview\profil_tutor_screen.dart:329:56 - dead_null_aware_expression
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\class_card.dart:43:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\class_card.dart:73:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\search_bar.dart:53:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\search_bar.dart:79:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\search_bar.dart:87:31 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\stat_card.dart:28:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\stat_card.dart:40:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\student_enrollment_card.dart:44:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\student_enrollment_card.dart:82:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\student_enrollment_card.dart:116:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\tutor_profile_card.dart:39:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widget\tutor_profile_card.dart:87:54 - deprecated_member_use
+

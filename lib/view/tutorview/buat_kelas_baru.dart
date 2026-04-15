@@ -15,12 +15,13 @@ class JadwalKelas {
 
 class BuatKelasBaruScreen extends StatefulWidget {
   final Kelas? kelas;
-  final int? kelasId;
+  final String? kelasId;
   const BuatKelasBaruScreen({super.key, this.kelas, this.kelasId});
 
   @override
   State<BuatKelasBaruScreen> createState() => _BuatKelasBaruState();
 }
+// ... (rest of the code similar but with String for IDs)
 
 class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
   late TextEditingController namaKelasController;
@@ -201,7 +202,7 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.push(TutorMainScreen()),
+          onPressed: () => context.push(const TutorMainScreen()),
         ),
         title: const Text(
           "Buat Kelas Baru",
@@ -218,9 +219,9 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 4),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 Text(
                   "Detail Kelas",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -258,7 +259,7 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: kategoriController,
+              initialValue: kategoriController,
               decoration: inputDecoration("Select category"),
               items: categories
                   .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
@@ -385,7 +386,7 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => context.push(TutorMainScreen()),
+                    onPressed: () => context.push(const TutorMainScreen()),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(

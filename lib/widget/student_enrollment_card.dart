@@ -9,14 +9,14 @@ class StudentEnrollmentCard extends StatelessWidget {
   final VoidCallback? onRemove;
 
   const StudentEnrollmentCard({
-    Key? key,
+    super.key,
     required this.namaSiswa,
     required this.statusEnrollment,
     required this.nilaiProgress,
     required this.tanggalDaftar,
     this.onTap,
     this.onRemove,
-  }) : super(key: key);
+  });
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {

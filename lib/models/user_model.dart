@@ -8,12 +8,23 @@ class UserModel {
   final String? role;
   final String? nama;
 
+  final String? photoUrl;
+  final String? phone;
+  final String? bio;
+  final String? school;
+  final String? location;
+
   UserModel({
     this.id,
     required this.email,
     required this.password,
     this.role,
     this.nama,
+    this.photoUrl,
+    this.phone,
+    this.bio,
+    this.school,
+    this.location,
   });
 
   // Convert UserModel to Map for database insertion
@@ -24,6 +35,11 @@ class UserModel {
       'password': password,
       'role': role,
       'nama': nama,
+      'photoUrl': photoUrl,
+      'phone': phone,
+      'bio': bio,
+      'school': school,
+      'location': location,
     };
   }
 
@@ -35,6 +51,11 @@ class UserModel {
       password: map['password'] as String,
       role: map['role'] != null ? map['role'] as String : null,
       nama: map['nama'] != null ? map['nama'] as String : null,
+      photoUrl: map['photoUrl'] as String?,
+      phone: map['phone'] as String?,
+      bio: map['bio'] as String?,
+      school: map['school'] as String?,
+      location: map['location'] as String?,
     );
   }
 

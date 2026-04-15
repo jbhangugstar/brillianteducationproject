@@ -90,7 +90,7 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
                   controller: nameController,
                   decoration: InputDecoration(
                     hintText: "Masukkan nama lengkap Anda",
-                    prefixIcon: Icon(Icons.person),
+                    prefixIcon: const Icon(Icons.person),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -107,7 +107,7 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     hintText: "contoh@email.com",
-                    prefixIcon: Icon(Icons.email),
+                    prefixIcon: const Icon(Icons.email),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -126,7 +126,7 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    prefixIcon: Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock),
                     hintText: "Masukkan kata sandi",
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -155,7 +155,7 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    prefixIcon: Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock),
                     hintText: "Ulangi kata sandi",
                     suffixIcon: IconButton(
                       icon: Icon(

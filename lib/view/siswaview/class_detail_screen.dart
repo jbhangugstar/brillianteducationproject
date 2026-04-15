@@ -1,29 +1,30 @@
+import 'package:brillianteducationproject/models/kelas_model.dart';
+import 'package:brillianteducationproject/models/user_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/controller/enrollment_controller.dart';
 import 'package:brillianteducationproject/widget/student_enrollment_card.dart';
-import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/models/enrollment_model.dart';
-import 'package:brillianteducationproject/controller/siswa_controller.dart';
-import 'package:brillianteducationproject/models/siswa_model.dart';
 
 class ClassDetailScreen extends StatefulWidget {
-  final int kelasId;
+  final String kelasId;
   final String namaKelas;
 
   const ClassDetailScreen({
-    Key? key,
+    super.key,
     required this.kelasId,
     required this.namaKelas,
-  }) : super(key: key);
+  });
 
   @override
   State<ClassDetailScreen> createState() => _ClassDetailScreenState();
 }
 
 class _ClassDetailScreenState extends State<ClassDetailScreen> {
-  late Future<dynamic> kelasFuture;
-  late Future<List<dynamic>> studentsFuture;
+  late Future<Kelas?> kelasFuture;
+  late Future<List<EnrollmentModel>> studentsFuture;
 
   @override
   void initState() {
@@ -32,48 +33,40 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     studentsFuture = EnrollmentController.getEnrollmentsByClass(widget.kelasId);
   }
 
-  Future<void> daftarKelas(dynamic kelas) async {
-    String? studentId = await PreferenceHandler.getStudentId();
+  Future<void> daftarKelas(Kelas kelas) async {
+    final user = FirebaseAuth.instance.currentUser;
 
-    if (studentId == null) {
+    if (user == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Student ID tidak ditemukan"),
+          content: Text("Silakan login terlebih dahulu"),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    String? email = await PreferenceHandler.getUserEmail();
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
 
-    if (email == null) {
+    if (!userDoc.exists) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Email tidak ditemukan"),
+          content: Text("Data user tidak ditemukan"),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    SiswaModel? siswa = await SiswaController.getSiswaByEmail(email);
-
-    if (siswa == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Data siswa tidak ditemukan"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    final userData = UserModel.fromMap(userDoc.data()!);
 
     bool sudahDaftar = await EnrollmentController.isStudentEnrolled(
-      studentId,
+      user.uid,
       widget.kelasId,
     );
 
@@ -89,13 +82,14 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     }
 
     EnrollmentModel enrollment = EnrollmentModel(
-      idSiswa: studentId,
+      idSiswa: user.uid,
       idKelas: widget.kelasId,
-      namaSiswa: siswa.nama,
-      namaKelas: kelas['nama_kelas'],
+      namaSiswa: userData.nama ?? "Siswa",
+      emailSiswa: userData.email,
+      namaKelas: kelas.namaKelas,
       status: "aktif",
       nilaiProgress: 0,
-      tanggalDaftar: DateTime.now().toString(),
+      tanggalDaftar: DateTime.now().toIso8601String(),
     );
 
     await EnrollmentController.enrollStudent(enrollment);
@@ -105,7 +99,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: Colors.green,
-        content: Text("Berhasil daftar ke ${kelas['nama_kelas']}!"),
+        content: Text("Berhasil daftar ke ${kelas.namaKelas}!"),
       ),
     );
 
@@ -120,7 +114,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
-      body: FutureBuilder<dynamic>(
+      body: FutureBuilder<Kelas?>(
         future: kelasFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -129,14 +123,14 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
             );
           }
 
-          if (!snapshot.hasData) {
+          if (!snapshot.hasData || snapshot.data == null) {
             return Scaffold(
               appBar: AppBar(),
               body: const Center(child: Text("Kelas tidak ditemukan")),
             );
           }
 
-          final kelas = snapshot.data;
+          final kelas = snapshot.data!;
 
           return CustomScrollView(
             slivers: [
@@ -145,7 +139,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
                   title: Text(
-                    kelas['nama_kelas'] ?? 'Kelas',
+                    kelas.namaKelas,
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -173,7 +167,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Rp ${kelas['harga']}',
+                            'Rp ${kelas.harga}',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -185,6 +179,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                             label: const Text("Daftar"),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF6C4FD8),
+                              foregroundColor: Colors.white,
                             ),
                             onPressed: () {
                               showDialog(
@@ -192,7 +187,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                                 builder: (context) => AlertDialog(
                                   title: const Text("Daftar Kelas"),
                                   content: Text(
-                                    "Daftar ke kelas ${kelas['nama_kelas']}?",
+                                    "Daftar ke kelas ${kelas.namaKelas}?",
                                   ),
                                   actions: [
                                     TextButton(
@@ -214,6 +209,21 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         ],
                       ),
 
+                      const SizedBox(height: 12),
+
+                      const Text(
+                        'Deskripsi Kelas',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        kelas.deskripsi ?? "Tidak ada deskripsi",
+                        style: const TextStyle(color: Colors.black87),
+                      ),
+
                       const SizedBox(height: 24),
 
                       const Text(
@@ -230,7 +240,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                 ),
               ),
 
-              FutureBuilder<List<dynamic>>(
+              FutureBuilder<List<EnrollmentModel>>(
                 future: studentsFuture,
                 builder: (context, studentSnapshot) {
                   if (studentSnapshot.connectionState ==
@@ -238,14 +248,14 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                     return const SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.all(16),
-                        child: CircularProgressIndicator(),
+                        child: Center(child: CircularProgressIndicator()),
                       ),
                     );
                   }
 
-                  final students = studentSnapshot.data ?? [];
+                  final enrollments = studentSnapshot.data ?? [];
 
-                  if (students.isEmpty) {
+                  if (enrollments.isEmpty) {
                     return const SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.all(16),
@@ -256,21 +266,22 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
 
                   return SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
-                      final student = students[index];
+                      final enrollment = enrollments[index];
 
                       return Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         child: StudentEnrollmentCard(
-                          namaSiswa:
-                              student['nama_siswa'] ?? 'Siswa Tidak Diketahui',
-                          statusEnrollment: student['status'] ?? 'aktif',
-                          nilaiProgress: (student['nilai_progress'] ?? 0)
+                          namaSiswa: enrollment.namaSiswa,
+                          statusEnrollment: enrollment.status,
+                          nilaiProgress: (enrollment.nilaiProgress ?? 0.0)
                               .toDouble(),
-                          tanggalDaftar:
-                              student['tanggal_daftar'] ?? 'Tidak diketahui',
+                          tanggalDaftar: enrollment.tanggalDaftar,
                         ),
                       );
-                    }, childCount: students.length),
+                    }, childCount: enrollments.length),
                   );
                 },
               ),

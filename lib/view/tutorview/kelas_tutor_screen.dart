@@ -78,7 +78,7 @@ class _KelasTutorScreenState extends State<KelasTutorScreen> {
 
   Widget kelasCard(Kelas kelas) {
     final title = kelas.namaKelas;
-    final tutor = kelas.tutor ?? "Tutor";
+    final tutor = kelas.tutor;
     final price = 'Rp ${kelas.harga}';
     final schedule = kelas.jadwal;
     final students = '${kelas.jumlahSiswa ?? 0} siswa';

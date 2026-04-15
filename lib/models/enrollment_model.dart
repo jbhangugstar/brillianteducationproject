@@ -1,8 +1,9 @@
 class EnrollmentModel {
-  final int? id;
+  final String? id;
   final String idSiswa;
-  final int idKelas;
+  final String idKelas;
   final String namaSiswa;
+  final String emailSiswa;
   final String namaKelas;
   final String tanggalDaftar;
   final String status;
@@ -13,6 +14,7 @@ class EnrollmentModel {
     required this.idSiswa,
     required this.idKelas,
     required this.namaSiswa,
+    required this.emailSiswa,
     required this.namaKelas,
     required this.tanggalDaftar,
     required this.status,
@@ -25,6 +27,7 @@ class EnrollmentModel {
       'id_siswa': idSiswa,
       'id_kelas': idKelas,
       'nama_siswa': namaSiswa,
+      'email_siswa': emailSiswa,
       'nama_kelas': namaKelas,
       'tanggal_daftar': tanggalDaftar,
       'status': status,
@@ -38,6 +41,7 @@ class EnrollmentModel {
       idSiswa: map['id_siswa'],
       idKelas: map['id_kelas'],
       namaSiswa: map['nama_siswa'],
+      emailSiswa: map['email_siswa'] ?? '',
       namaKelas: map['nama_kelas'],
       tanggalDaftar: map['tanggal_daftar'],
       status: map['status'],

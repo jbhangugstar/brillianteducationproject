@@ -15,7 +15,7 @@ class ClassCard extends StatelessWidget {
   final String? foto;
 
   const ClassCard({
-    Key? key,
+    super.key,
     required this.namaKelas,
     required this.namaTutor,
     required this.jadwal,
@@ -27,7 +27,7 @@ class ClassCard extends StatelessWidget {
     this.onBook,
     this.kategori,
     this.foto,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +52,11 @@ class ClassCard extends StatelessWidget {
             // Header dengan kategori
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFF6C4FD8), Color(0xFF9966FF)],
                 ),
-                borderRadius: const BorderRadius.vertical(
+                borderRadius: BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
               ),
@@ -250,42 +250,67 @@ class ClassCard extends StatelessWidget {
   }
 
   Widget _buildImage(String fotoPath) {
-    try {
-      // Check if it's a file path
-      if (fotoPath.isNotEmpty) {
-        final file = File(fotoPath);
-        if (file.existsSync()) {
-          return Image.file(
-            file,
+    if (fotoPath.isEmpty) {
+      return Container(
+        width: double.infinity,
+        height: 140,
+        color: Colors.grey[300],
+        child: const Icon(Icons.image_outlined, color: Colors.grey),
+      );
+    }
+
+    // Check if it's a network URL
+    if (fotoPath.startsWith('http://') || fotoPath.startsWith('https://')) {
+      return Image.network(
+        fotoPath,
+        width: double.infinity,
+        height: 140,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
             width: double.infinity,
             height: 140,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                width: double.infinity,
-                height: 140,
-                color: Colors.grey[300],
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.image_not_supported, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text(
-                      'Gambar tidak ditemukan',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-              );
-            },
+            color: Colors.grey[300],
+            child: const Icon(Icons.error_outline, color: Colors.grey),
           );
-        }
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          );
+        },
+      );
+    }
+
+    try {
+      final file = File(fotoPath);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          width: double.infinity,
+          height: 140,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: double.infinity,
+              height: 140,
+              color: Colors.grey[300],
+              child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
+            );
+          },
+        );
       }
     } catch (e) {
       print('Error loading image: $e');
     }
 
-    // Fallback if image not found
+    // Fallback if image not found or invalid path
     return Container(
       width: double.infinity,
       height: 140,

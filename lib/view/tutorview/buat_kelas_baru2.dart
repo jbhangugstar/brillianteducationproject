@@ -1,7 +1,6 @@
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/extension/navigator.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
-import 'package:brillianteducationproject/view/tutorview/buat_kelas_baru.dart';
 import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -13,8 +12,8 @@ class BuatKelasStep2Screen extends StatefulWidget {
   final String tutor;
   final String deskripsi;
   final String gambar;
-  final int? kelasId;
-  final String? tutorId; // ⭐ tutorId ditambahkan
+  final String? kelasId;
+  final String? tutorId;
 
   const BuatKelasStep2Screen({
     super.key,
@@ -26,7 +25,7 @@ class BuatKelasStep2Screen extends StatefulWidget {
     required this.deskripsi,
     required this.gambar,
     this.kelasId,
-    this.tutorId, // ⭐ wajib kirim dari Step 1
+    this.tutorId,
   });
 
   @override
@@ -51,8 +50,8 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
         throw Exception("Harga tidak valid");
       }
 
-      // Buat object Kelas
       final kelas = Kelas(
+        id: widget.kelasId,
         namaKelas: widget.namaKelas,
         harga: hargaInt,
         jadwal: widget.jadwal,
@@ -63,37 +62,31 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
         status: 'aktif',
         jumlahSiswa: 0,
         rating: 0.0,
-        idTutor: widget.tutorId, // ⭐ penting! supaya muncul di Jadwal Tutor
+        idTutor: widget.tutorId,
       );
-
-      late int result;
 
       // MODE EDIT
       if (widget.kelasId != null) {
-        result = await KelasController.updateKelas(widget.kelasId!, kelas);
+        await KelasController.updateKelas(kelas);
       } else {
         // MODE CREATE
-        result = await KelasController.createKelas(kelas);
+        await KelasController.createKelas(kelas);
       }
 
-      if (result > 0) {
+      if (mounted) {
         final message = widget.kelasId != null
             ? "Kelas berhasil diperbarui"
             : "Kelas berhasil diterbitkan";
 
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.green),
+        );
+
+        await Future.delayed(const Duration(milliseconds: 1200));
+
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message), backgroundColor: Colors.green),
-          );
-
-          await Future.delayed(const Duration(milliseconds: 1200));
-
-          if (mounted) {
-            context.push(TutorMainScreen());
-          }
+          context.pushAndRemoveAll(const TutorMainScreen());
         }
-      } else {
-        throw Exception("Gagal menyimpan kelas");
       }
     } catch (e) {
       if (mounted) {
@@ -122,11 +115,11 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            context.push(BuatKelasBaruScreen());
+            Navigator.pop(context);
           },
         ),
         title: Text(
-          isEdit ? "Edit Kelas" : "Buat Kelas Baru",
+          isEdit ? "Konfirmasi Edit" : "Konfirmasi Terbit",
           style: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -142,46 +135,27 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
               "Langkah 2 dari 2",
               style: TextStyle(color: Colors.grey),
             ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
-                  "Hampir Selesai",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "100%",
-                  style: TextStyle(
-                    color: Color(0xff3D5AFE),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: 1,
-              backgroundColor: Colors.grey.shade300,
-              color: const Color(0xff3D5AFE),
-              minHeight: 6,
-            ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.all(15),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     'Ringkasan Data Kelas',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  const SizedBox(height: 12),
+                  const Divider(height: 30),
                   _buildReviewItem('Nama Kelas', widget.namaKelas),
                   _buildReviewItem('Kategori', widget.kategori),
                   _buildReviewItem('Jadwal', widget.jadwal),
@@ -200,16 +174,14 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {
-                      context.push(BuatKelasBaruScreen());
-                    },
+                    onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text("Kembali"),
+                    child: const Text("Ubah Data"),
                   ),
                 ),
                 const SizedBox(width: 15),
@@ -218,25 +190,17 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
                     onPressed: _isLoading ? null : _terbitkanKelas,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xff3D5AFE),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
+                        ? const CircularProgressIndicator(color: Colors.white)
                         : Text(
-                            isEdit ? "Simpan Perubahan" : "Terbitkan Kelas",
-                            style: const TextStyle(color: Colors.white),
+                            isEdit ? "Simpan Perubahan" : "Terbitkan Sekarang",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                   ),
                 ),
@@ -254,7 +218,7 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
     bool isMultiline = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -269,9 +233,9 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
           const SizedBox(height: 4),
           Text(
             value,
-            maxLines: isMultiline ? 3 : 1,
+            maxLines: isMultiline ? 5 : 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ],
       ),

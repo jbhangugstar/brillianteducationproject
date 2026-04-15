@@ -38,7 +38,7 @@ class RegisteroptionScreen extends StatelessWidget {
 
               ElevatedButton(
                 onPressed: () {
-                  context.push(RegisterSiswaScreen());
+                  context.push(const RegisterSiswaScreen());
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white, // warna tombol
@@ -52,7 +52,7 @@ class RegisteroptionScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10), // bikin melengkung
                     side: const BorderSide(
-                      color: const Color.fromARGB(
+                      color: Color.fromARGB(
                         255,
                         179,
                         8,
@@ -72,7 +72,7 @@ class RegisteroptionScreen extends StatelessWidget {
 
               ElevatedButton(
                 onPressed: () {
-                  context.push((RegistertutorScreen()));
+                  context.push((const RegistertutorScreen()));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white, // warna tombol
@@ -92,12 +92,11 @@ class RegisteroptionScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
 
               ElevatedButton(
-                child: const Text("Kembali"),
                 onPressed: () {
-                  context.push((LoginScreen()));
+                  context.push((const LoginScreen()));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
@@ -105,6 +104,7 @@ class RegisteroptionScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
+                child: const Text("Kembali"),
               ),
             ],
           ),

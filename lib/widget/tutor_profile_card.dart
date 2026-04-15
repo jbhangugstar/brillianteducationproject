@@ -12,7 +12,7 @@ class TutorProfileCard extends StatelessWidget {
   final VoidCallback? onContact;
 
   const TutorProfileCard({
-    Key? key,
+    super.key,
     required this.nama,
     required this.mataaPelajaran,
     this.foto,
@@ -22,7 +22,7 @@ class TutorProfileCard extends StatelessWidget {
     this.deskripsi,
     this.onTap,
     this.onContact,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

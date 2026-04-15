@@ -1,5 +1,5 @@
 class Kelas {
-  int? id;
+  String? id;
   String namaKelas;
   int harga;
   String jadwal;
@@ -35,7 +35,7 @@ class Kelas {
 
   // =================== COPYWITH ===================
   Kelas copyWith({
-    int? id,
+    String? id,
     String? namaKelas,
     int? harga,
     String? jadwal,

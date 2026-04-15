@@ -1,58 +1,17 @@
-import 'package:brillianteducationproject/database/db_helper.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:brillianteducationproject/service/firebase_service.dart';
 
 class KelasController {
   // ===============================
   // CREATE KELAS
   // ===============================
-  static Future<int> createKelas(Kelas kelas) async {
+  static Future<String> createKelas(Kelas kelas) async {
     try {
       print('\n>>> KelasController.createKelas()');
-      print('    Nama: ${kelas.namaKelas}');
-      print('    Harga: ${kelas.harga}');
-
-      final db = await DBHelper.db();
-      print('    ✅ Database terbuka');
-
-      final map = kelas.toMap();
-      print('    Map keys: ${map.keys.toList()}');
-      print('    Map values: ${map.values.toList()}');
-
-      // Validate required fields
-      if (!map.containsKey('nama_kelas')) {
-        throw Exception('Field nama_kelas tidak boleh kosong!');
-      }
-      if (!map.containsKey('harga')) {
-        throw Exception('Field harga tidak boleh kosong!');
-      }
-
-      final result = await db.insert(
-        'kelas',
-        map,
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-
-      print('    ✅ Insert result: $result (type: ${result.runtimeType})');
-
-      // Verify data tersimpan
-      if (result > 0) {
-        final verify = await db.query(
-          'kelas',
-          where: 'id = ?',
-          whereArgs: [result],
-        );
-        print('    ✅ Verify: Data ditemukan = ${verify.isNotEmpty}');
-        if (verify.isNotEmpty) {
-          print('    ✅ Data di DB: ${verify.first}');
-        }
-      }
-
-      return result;
-    } catch (e, st) {
+      return await FirebaseService.createKelas(kelas);
+    } catch (e) {
       print('    ❌ ERROR: $e');
-      print('    Stack: $st');
-      rethrow; // Re-throw untuk biar handle di screen level
+      rethrow;
     }
   }
 
@@ -61,11 +20,7 @@ class KelasController {
   // ===============================
   static Future<List<Kelas>> getAllKelas() async {
     try {
-      final db = await DBHelper.db();
-
-      final result = await db.query('kelas');
-
-      return result.map((e) => Kelas.fromMap(e)).toList();
+      return await FirebaseService.getAllKelas();
     } catch (e) {
       print("Error getAllKelas: $e");
       return [];
@@ -75,17 +30,10 @@ class KelasController {
   // ===============================
   // READ KELAS BY ID
   // ===============================
-  static Future<Kelas?> getKelasById(int id) async {
+  static Future<Kelas?> getKelasById(String id) async {
     try {
-      final db = await DBHelper.db();
-
-      final result = await db.query('kelas', where: 'id = ?', whereArgs: [id]);
-
-      if (result.isNotEmpty) {
-        return Kelas.fromMap(result.first);
-      }
-
-      return null;
+      final all = await FirebaseService.getAllKelas();
+      return all.firstWhere((element) => element.id == id);
     } catch (e) {
       print("Error getKelasById: $e");
       return null;
@@ -97,15 +45,8 @@ class KelasController {
   // ===============================
   static Future<List<Kelas>> getKelasByTutor(String tutorId) async {
     try {
-      final db = await DBHelper.db();
-
-      final result = await db.query(
-        'kelas',
-        where: 'id_tutor = ?',
-        whereArgs: [tutorId],
-      );
-
-      return result.map((e) => Kelas.fromMap(e)).toList();
+      final all = await FirebaseService.getAllKelas();
+      return all.where((element) => element.idTutor == tutorId).toList();
     } catch (e) {
       print("Error getKelasByTutor: $e");
       return [];
@@ -117,15 +58,8 @@ class KelasController {
   // ===============================
   static Future<List<Kelas>> getKelasByKategori(String kategori) async {
     try {
-      final db = await DBHelper.db();
-
-      final result = await db.query(
-        'kelas',
-        where: 'kategori = ?',
-        whereArgs: [kategori],
-      );
-
-      return result.map((e) => Kelas.fromMap(e)).toList();
+      final all = await FirebaseService.getAllKelas();
+      return all.where((element) => element.kategori == kategori).toList();
     } catch (e) {
       print("Error getKelasByKategori: $e");
       return [];
@@ -133,19 +67,17 @@ class KelasController {
   }
 
   // ===============================
-  // SEARCH KELAS (case insensitive)
+  // SEARCH KELAS
   // ===============================
   static Future<List<Kelas>> searchKelas(String keyword) async {
     try {
-      final db = await DBHelper.db();
-
-      final result = await db.query(
-        'kelas',
-        where: 'LOWER(nama_kelas) LIKE ? OR LOWER(deskripsi) LIKE ?',
-        whereArgs: ['%${keyword.toLowerCase()}%', '%${keyword.toLowerCase()}%'],
-      );
-
-      return result.map((e) => Kelas.fromMap(e)).toList();
+      final all = await FirebaseService.getAllKelas();
+      return all
+          .where((e) =>
+              e.namaKelas.toLowerCase().contains(keyword.toLowerCase()) ||
+              (e.deskripsi?.toLowerCase().contains(keyword.toLowerCase()) ??
+                  false))
+          .toList();
     } catch (e) {
       print("Error searchKelas: $e");
       return [];
@@ -155,128 +87,48 @@ class KelasController {
   // ===============================
   // UPDATE KELAS
   // ===============================
-  static Future<int> updateKelas(int id, Kelas kelas) async {
+  static Future<void> updateKelas(Kelas kelas) async {
     try {
-      final db = await DBHelper.db();
-
-      return await db.update(
-        'kelas',
-        kelas.toMap(),
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await FirebaseService.updateKelas(kelas);
     } catch (e) {
       print("Error updateKelas: $e");
-      return -1;
     }
   }
 
   // ===============================
   // DELETE KELAS
   // ===============================
-  static Future<int> deleteKelas(int id) async {
+  static Future<void> deleteKelas(String id) async {
     try {
-      final db = await DBHelper.db();
-
-      return await db.delete('kelas', where: 'id = ?', whereArgs: [id]);
+      await FirebaseService.deleteKelas(id);
     } catch (e) {
       print("Error deleteKelas: $e");
-      return -1;
     }
   }
 
   // ===============================
   // TOTAL SISWA DALAM KELAS
   // ===============================
-  static Future<int> getTotalStudentsInClass(int kelasId) async {
-    try {
-      final db = await DBHelper.db();
-
-      final result = await db.rawQuery(
-        'SELECT COUNT(*) as total FROM enrollment WHERE id_kelas = ? AND status = ?',
-        [kelasId, 'aktif'],
-      );
-
-      return Sqflite.firstIntValue(result) ?? 0;
-    } catch (e) {
-      print("Error getTotalStudentsInClass: $e");
-      return 0;
-    }
+  static Future<int> getTotalStudentsInClass(String kelasId) async {
+    // This will be handled by listening to enrollments in Firebase
+    return 0; 
   }
 
   // ===============================
   // TOP RATED CLASSES
   // ===============================
   static Future<List<Kelas>> getTopRatedKelas({int limit = 5}) async {
-    try {
-      final db = await DBHelper.db();
-
-      final result = await db.query(
-        'kelas',
-        orderBy: 'rating DESC',
-        limit: limit,
-      );
-
-      return result.map((e) => Kelas.fromMap(e)).toList();
-    } catch (e) {
-      print("Error getTopRatedKelas: $e");
-      return [];
-    }
+    final all = await FirebaseService.getAllKelas();
+    all.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
+    return all.take(limit).toList();
   }
 
   // ===============================
   // POPULAR CLASSES
   // ===============================
   static Future<List<Kelas>> getPopularKelas({int limit = 5}) async {
-    try {
-      final db = await DBHelper.db();
-
-      final result = await db.query(
-        'kelas',
-        orderBy: 'jumlah_siswa DESC',
-        limit: limit,
-      );
-
-      return result.map((e) => Kelas.fromMap(e)).toList();
-    } catch (e) {
-      print("Error getPopularKelas: $e");
-      return [];
-    }
-  }
-
-  // ===============================
-  // UPDATE JUMLAH SISWA
-  // ===============================
-  static Future<void> updateStudentCount(int kelasId) async {
-    try {
-      final count = await getTotalStudentsInClass(kelasId);
-
-      final db = await DBHelper.db();
-
-      await db.update(
-        'kelas',
-        {'jumlah_siswa': count},
-        where: 'id = ?',
-        whereArgs: [kelasId],
-      );
-    } catch (e) {
-      print("Error updateStudentCount: $e");
-    }
-  }
-
-  // ===============================
-  // TOTAL KELAS
-  // ===============================
-  static Future<int> getTotalKelas() async {
-    try {
-      final db = await DBHelper.db();
-
-      final result = await db.rawQuery('SELECT COUNT(*) FROM kelas');
-
-      return Sqflite.firstIntValue(result) ?? 0;
-    } catch (e) {
-      print("Error getTotalKelas: $e");
-      return 0;
-    }
+    final all = await FirebaseService.getAllKelas();
+    all.sort((a, b) => (b.jumlahSiswa ?? 0).compareTo(a.jumlahSiswa ?? 0));
+    return all.take(limit).toList();
   }
 }

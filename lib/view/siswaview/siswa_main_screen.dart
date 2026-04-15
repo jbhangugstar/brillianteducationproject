@@ -35,7 +35,7 @@ class _SiswaMainScreenState extends State<SiswaMainScreen> {
         },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Color(0xFFB23AEE),
+        unselectedItemColor: const Color(0xFFB23AEE),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Kelas'),

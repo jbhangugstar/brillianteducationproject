@@ -1,159 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:brillianteducationproject/controller/enrollment_controller.dart';
-import 'package:brillianteducationproject/controller/kelas_controller.dart';
-import 'package:brillianteducationproject/database/preference.dart';
-import 'package:brillianteducationproject/widget/search_bar.dart'
-    as custom_search;
+import 'package:brillianteducationproject/models/enrollment_model.dart';
+import 'package:intl/intl.dart';
 
 class ManageStudentsScreen extends StatefulWidget {
-  final int kelasId;
+  final String kelasId;
   final String namaKelas;
 
   const ManageStudentsScreen({
-    Key? key,
+    super.key,
     required this.kelasId,
     required this.namaKelas,
-  }) : super(key: key);
+  });
 
   @override
   State<ManageStudentsScreen> createState() => _ManageStudentsScreenState();
 }
 
 class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
-  late Future<List<dynamic>> studentsFuture;
-  List<dynamic> allStudents = [];
-  List<dynamic> filteredStudents = [];
+  late Future<List<EnrollmentModel>> studentsFuture;
+  List<EnrollmentModel> allEnrollments = [];
+  List<EnrollmentModel> filteredEnrollments = [];
   String searchQuery = '';
   String filterStatus = 'Semua';
   bool isAuthorized = true;
 
   final List<String> statusOptions = [
     'Semua',
-    'aktif',
-    'selesai',
-    'dibatalkan',
+    'Aktif',
+    'Selesai',
+    'Dibatalkan',
   ];
 
   @override
   void initState() {
     super.initState();
-    _checkAuthorization();
+    _loadData();
   }
 
-  Future<void> _checkAuthorization() async {
-    try {
-      final tutorId = await PreferenceHandler.getTutorId();
-      final kelas = await KelasController.getKelasById(widget.kelasId);
-
-      if (tutorId != null && kelas != null && kelas.idTutor == tutorId) {
-        // ✅ Authorized
-        setState(() {
-          isAuthorized = true;
-          studentsFuture = EnrollmentController.getEnrollmentsByClass(
-            widget.kelasId,
-          );
-        });
-      } else {
-        // ❌ Tidak authorized
-        setState(() {
-          isAuthorized = false;
-        });
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Anda tidak memiliki akses untuk mengelola kelas ini',
-              ),
-              backgroundColor: Colors.red,
-            ),
-          );
-          Future.delayed(const Duration(seconds: 1), () {
-            if (mounted) Navigator.pop(context);
-          });
-        }
-      }
-    } catch (e) {
-      print('Error checking authorization: $e');
-      setState(() {
-        isAuthorized = false;
-      });
-    }
-  }
-
-  void _filterStudents() {
+  void _loadData() {
     setState(() {
-      filteredStudents = allStudents.where((student) {
-        final matchesSearch = student['nama_siswa']
-            .toString()
-            .toLowerCase()
-            .contains(searchQuery.toLowerCase());
+      studentsFuture = EnrollmentController.getEnrollmentsByClass(
+        widget.kelasId,
+      );
+    });
+  }
+
+  void _filterEnrollments() {
+    setState(() {
+      filteredEnrollments = allEnrollments.where((enrollment) {
+        final matchesSearch =
+            enrollment.namaSiswa.toLowerCase().contains(
+              searchQuery.toLowerCase(),
+            ) ||
+            enrollment.emailSiswa.toLowerCase().contains(
+              searchQuery.toLowerCase(),
+            );
 
         final matchesStatus =
             filterStatus == 'Semua' ||
-            student['status'].toString().toLowerCase() ==
-                filterStatus.toLowerCase();
+            enrollment.status.toLowerCase() == filterStatus.toLowerCase();
 
         return matchesSearch && matchesStatus;
       }).toList();
     });
   }
 
-  void _updateStudentProgress(int enrollmentId, double newProgress) {
-    if (!isAuthorized) return; // 🔒 Lindungi aksi
-    EnrollmentController.updateStudentProgress(enrollmentId, newProgress).then((
-      _,
-    ) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.green,
-          content: Text("Progress siswa berhasil diperbarui"),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.all(16),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      setState(() {
-        studentsFuture = EnrollmentController.getEnrollmentsByClass(
-          widget.kelasId,
-        );
-      });
-    });
-  }
-
-  void _removeStudent(int enrollmentId) {
-    if (!isAuthorized) return; // 🔒 Lindungi aksi
+  void _removeStudent(String enrollmentId) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Hapus Siswa"),
-        content: const Text("Apakah Anda yakin ingin menghapus siswa ini?"),
+        content: const Text(
+          "Apakah Anda yakin ingin mengeluarkan siswa ini dari kelas?",
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text("Batal"),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              EnrollmentController.deleteEnrollment(enrollmentId).then((_) {
+              try {
+                await EnrollmentController.deleteEnrollment(enrollmentId);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    backgroundColor: Colors.green,
                     content: Text("Siswa berhasil dihapus"),
-                    behavior: SnackBarBehavior.floating,
-                    margin: EdgeInsets.all(16),
+                    backgroundColor: Colors.green,
                   ),
                 );
-                setState(() {
-                  studentsFuture = EnrollmentController.getEnrollmentsByClass(
-                    widget.kelasId,
-                  );
-                });
-              });
+                _loadData();
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Gagal menghapus siswa: $e"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text("Hapus"),
+            child: const Text("Hapus", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -165,173 +113,222 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF6C4FD8), Color(0xFF9966FF)],
+            ),
+          ),
+        ),
         title: Text(
-          'Kelola Siswa - ${widget.namaKelas}',
+          widget.namaKelas,
           style: const TextStyle(
-            color: Colors.black87,
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            color: Colors.white,
           ),
         ),
         centerTitle: true,
       ),
-      body: !isAuthorized
-          ? const Center(child: CircularProgressIndicator())
-          : FutureBuilder<List<dynamic>>(
-              future: studentsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF6C4FD8)),
-                  );
-                }
+      body: FutureBuilder<List<EnrollmentModel>>(
+        future: studentsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.people_outline,
-                          size: 80,
-                          color: Colors.grey.withOpacity(0.3),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          "Belum ada siswa di kelas ini",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+          if (snapshot.hasError) {
+            return Center(child: Text("Gagal memuat data: ${snapshot.error}"));
+          }
 
-                allStudents = snapshot.data!;
-                if (filteredStudents.isEmpty &&
-                    (searchQuery.isNotEmpty || filterStatus != 'Semua')) {
-                  _filterStudents();
-                } else if (filteredStudents.isEmpty) {
-                  filteredStudents = allStudents;
-                }
+          allEnrollments = snapshot.data ?? [];
+          _filterEnrollments();
 
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Search Bar
-                      Padding(
+          if (allEnrollments.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          return Column(
+            children: [
+              _buildFilterSection(),
+              Expanded(
+                child: filteredEnrollments.isEmpty
+                    ? const Center(child: Text("Siswa tidak ditemukan"))
+                    : ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        child: custom_search.SearchBar(
-                          hintText: "Cari siswa...",
-                          onChanged: (value) {
-                            searchQuery = value;
-                            _filterStudents();
-                          },
-                        ),
+                        itemCount: filteredEnrollments.length,
+                        itemBuilder: (context, index) {
+                          return _buildStudentCard(filteredEnrollments[index]);
+                        },
                       ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 
-                      // Status Filter
-                      SizedBox(
-                        height: 45,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: statusOptions.length,
-                          itemBuilder: (context, index) {
-                            final status = statusOptions[index];
-                            final isSelected = filterStatus == status;
-
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    filterStatus = status;
-                                  });
-                                  _filterStudents();
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? const Color(0xFF6C4FD8)
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: isSelected
-                                        ? null
-                                        : Border.all(
-                                            color: Colors.grey.withOpacity(0.3),
-                                          ),
-                                  ),
-                                  child: Text(
-                                    status,
-                                    style: TextStyle(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.black87,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // Results Info
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Menampilkan ${filteredStudents.length} siswa",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            if (searchQuery.isNotEmpty ||
-                                filterStatus != 'Semua')
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    searchQuery = '';
-                                    filterStatus = 'Semua';
-                                    filteredStudents = allStudents;
-                                  });
-                                },
-                                child: const Text(
-                                  "Reset Filter",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF6C4FD8),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-                    ],
+  Widget _buildFilterSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.white,
+      child: Column(
+        children: [
+          TextField(
+            onChanged: (value) {
+              searchQuery = value;
+              _filterEnrollments();
+            },
+            decoration: InputDecoration(
+              hintText: "Cari nama atau email...",
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: statusOptions.map((status) {
+                final isSelected = filterStatus == status;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(status),
+                    selected: isSelected,
+                    onSelected: (val) {
+                      setState(() {
+                        filterStatus = status;
+                      });
+                      _filterEnrollments();
+                    },
+                    selectedColor: const Color(0xFF6C4FD8).withOpacity(0.2),
+                    checkmarkColor: const Color(0xFF6C4FD8),
+                    labelStyle: TextStyle(
+                      color: isSelected
+                          ? const Color(0xFF6C4FD8)
+                          : Colors.black87,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
                   ),
                 );
-              },
+              }).toList(),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStudentCard(EnrollmentModel enrollment) {
+    String formattedDate = enrollment.tanggalDaftar;
+    try {
+      final dt = DateTime.parse(enrollment.tanggalDaftar);
+      formattedDate = DateFormat('dd MMM yyyy').format(dt);
+    } catch (_) {}
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: CircleAvatar(
+          backgroundColor: const Color(0xFF6C4FD8),
+          child: Text(
+            enrollment.namaSiswa.substring(0, 1).toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        title: Text(
+          enrollment.namaSiswa,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            Text(
+              enrollment.emailSiswa,
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    "Mendaftar: $formattedDate",
+                    style: TextStyle(color: Colors.blue.shade700, fontSize: 11),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    enrollment.status.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.person_remove_outlined, color: Colors.red),
+          onPressed: () => _removeStudent(enrollment.id!),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.people_outline,
+            size: 80,
+            color: Colors.grey.withOpacity(0.3),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            "Belum ada siswa terdaftar",
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
