@@ -34,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    // LOGIN USER MENGGUNAKAN FIREBASE SERVICE
     final user = await FirebaseService.loginUser(
       email: emailController.text,
       password: passwordController.text,

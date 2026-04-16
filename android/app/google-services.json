@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "420482446861",
+    "project_id": "brillian07",
+    "storage_bucket": "brillian07.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420482446861:android:4876482625a2ebf267c744",
+        "android_client_info": {
+          "package_name": "com.ppkd.brillianteducation"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDO-0mNEOH8HPXTCiuhP8j8LfJY7KH6qWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
