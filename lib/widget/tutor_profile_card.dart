@@ -1,3 +1,4 @@
+import 'package:brillianteducationproject/helper/image_helper.dart';
 import 'package:flutter/material.dart';
 
 class TutorProfileCard extends StatelessWidget {
@@ -46,16 +47,19 @@ class TutorProfileCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Foto
-            Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: ImageHelper.buildImage(
+                foto,
+                width: 70,
+                height: 70,
+                errorWidget: Container(
+                  width: 70,
+                  height: 70,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.person, size: 35, color: Colors.grey),
+                ),
               ),
-              child: foto != null
-                  ? Image.asset(foto!, fit: BoxFit.cover)
-                  : const Icon(Icons.person, size: 35, color: Colors.grey),
             ),
 
             const SizedBox(width: 14),

@@ -5,6 +5,7 @@ import 'package:brillianteducationproject/models/user_model.dart';
 import 'package:brillianteducationproject/service/firebase_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:brillianteducationproject/helper/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -37,25 +38,28 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Edit Profil"),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          "Edit Profil",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Nama Lengkap"),
+              _buildTextField(nameController, "Nama Lengkap", Icons.person),
+              const SizedBox(height: 12),
+              _buildTextField(
+                schoolController,
+                "Spesialisasi/Sekolah",
+                Icons.school,
               ),
-              TextField(
-                controller: schoolController,
-                decoration: const InputDecoration(
-                  labelText: "Spesialisasi/Sekolah",
-                ),
-              ),
-              TextField(
-                controller: bioController,
+              const SizedBox(height: 12),
+              _buildTextField(
+                bioController,
+                "Tentang Saya",
+                Icons.info_outline,
                 maxLines: 3,
-                decoration: const InputDecoration(labelText: "Tentang Saya"),
               ),
             ],
           ),
@@ -63,7 +67,7 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Batal"),
+            child: const Text("Batal", style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -82,9 +86,36 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
               await FirebaseService.updateUserProfile(updatedUser);
               if (mounted) Navigator.pop(context);
             },
-            child: const Text("Simpan"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF9966FF),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text("Simpan", style: TextStyle(color: Colors.white)),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 20),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
     );
   }
@@ -92,10 +123,8 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
   @override
   Widget build(BuildContext context) {
     final authUser = FirebaseAuth.instance.currentUser;
-
-    if (authUser == null) {
+    if (authUser == null)
       return const Scaffold(body: Center(child: Text("Silakan login kembali")));
-    }
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
@@ -121,244 +150,61 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
 
         return Scaffold(
           key: _scaffoldKey,
-          backgroundColor: const Color(0xFFF2F3F7),
+          extendBodyBehindAppBar: true,
           appBar: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
             elevation: 0,
-            title: const Text("Profil", style: TextStyle(color: Colors.black)),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: IconButton(
-                  icon: const Icon(Icons.settings, color: Colors.black),
-                  onPressed: () {
-                    _scaffoldKey.currentState!.openEndDrawer();
-                  },
-                ),
+            title: const Text(
+              "Brilliant Education",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
+            ),
+            actions: [
+              IconButton(
+                icon: const CircleAvatar(
+                  backgroundColor: Colors.white24,
+                  child: Icon(Icons.settings, color: Colors.white),
+                ),
+                onPressed: () => _scaffoldKey.currentState!.openEndDrawer(),
+              ),
+              const SizedBox(width: 8),
             ],
           ),
-          endDrawer: Drawer(
-            child: SafeArea(
-              child: Column(
-                children: [
-                  const DrawerHeader(
-                    child: Column(
-                      children: [
-                        Icon(Icons.settings, size: 50),
-                        SizedBox(height: 10),
-                        Text(
-                          "Settings",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.logout, color: Colors.red),
-                    title: const Text(
-                      "Logout",
-                      style: TextStyle(color: Colors.red),
-                    ),
-                    onTap: () {
-                      FirebaseService.logout();
-                      context.pushAndRemoveAll(const LoginScreen());
-                    },
-                  ),
+          endDrawer: _buildDrawer(context),
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromARGB(255, 199, 196, 201),
+                  Color.fromARGB(255, 197, 84, 235),
+                  Color.fromARGB(255, 214, 80, 210),
                 ],
               ),
             ),
-          ),
-          body: SingleChildScrollView(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color.fromARGB(255, 199, 196, 201),
-                    Color.fromARGB(255, 197, 84, 235),
-                    Color.fromARGB(255, 214, 80, 210),
-                  ],
-                ),
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      /// HEADER IMAGE & PHOTO
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Image.asset(
-                            "assets/images/library.jpg",
-                            height: 180,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                          Positioned(
-                            bottom: -40,
-                            left: 20,
-                            child: Stack(
-                              alignment: Alignment.bottomRight,
-                              children: [
-                                CircleAvatar(
-                                  radius: 45,
-                                  backgroundColor: Colors.white,
-                                  child: CircleAvatar(
-                                    radius: 42,
-                                    backgroundImage: userData.photoUrl != null
-                                        ? NetworkImage(userData.photoUrl!)
-                                        : const AssetImage(
-                                                'assets/images/tutor.jpg',
-                                              )
-                                              as ImageProvider,
-                                    child: _isUploading
-                                        ? const CircularProgressIndicator()
-                                        : null,
-                                  ),
-                                ),
-                                CircleAvatar(
-                                  radius: 15,
-                                  backgroundColor: Colors.purple,
-                                  child: IconButton(
-                                    icon: const Icon(
-                                      Icons.camera_alt,
-                                      size: 15,
-                                      color: Colors.white,
-                                    ),
-                                    onPressed: () => _pickImage(authUser.uid),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 50),
-
-                      /// PROFILE INFO
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              userData.nama ?? 'Tutor Name',
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              userData.school ?? "Kategori Belum Diisi",
-                              style: const TextStyle(
-                                color: Color.fromARGB(255, 8, 69, 119),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.location_on,
-                                  size: 16,
-                                  color: Color.fromARGB(255, 6, 109, 58),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  userData.location ?? "Indonesia",
-                                  style: const TextStyle(
-                                    color: Color.fromARGB(255, 43, 28, 177),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-
-                            /// BUTTON
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: () =>
-                                        _showEditProfileDialog(userData),
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      color: Colors.white,
-                                    ),
-                                    label: const Text(
-                                      "Edit Profil",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color.fromARGB(
-                                        255,
-                                        166,
-                                        87,
-                                        206,
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-
-                            /// TENTANG
-                            const Text(
-                              "Tentang",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              userData.bio ?? "Belum ada deskripsi profil.",
-                              style: const TextStyle(color: Colors.black87),
-                            ),
-                            const SizedBox(height: 24),
-
-                            /// REUSABLE SECTION PLACEHOLDERS
-                            const Text(
-                              "Informasi Lainnya",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            infoItem(
-                              icon: Icons.email,
-                              title: "Email",
-                              value: userData.email,
-                            ),
-                            const SizedBox(height: 12),
-                            infoItem(
-                              icon: Icons.phone,
-                              title: "Telepon",
-                              value: userData.phone ?? "Belum diisi",
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                    ],
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  _buildHeader(userData, authUser.uid),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+                    child: Column(
+                      children: [
+                        _buildMainInfoCard(userData),
+                        const SizedBox(height: 20),
+                        _buildAboutCard(userData),
+                        const SizedBox(height: 20),
+                        _buildContactCard(userData),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -367,24 +213,250 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
     );
   }
 
-  Widget infoItem({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHeader(UserModel userData, String uid) {
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
       children: [
-        Icon(icon, color: const Color(0xFF4A5BD4)),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(value, style: const TextStyle(color: Colors.black87)),
-          ],
+        Container(
+          height: 220,
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(30),
+              bottomRight: Radius.circular(30),
+            ),
+            image: DecorationImage(
+              image: AssetImage("assets/images/library.jpg"),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+              color: Colors.black.withOpacity(0.3),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -45,
+          child: Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 55,
+                  backgroundColor: Colors.grey[200],
+                  backgroundImage: ImageHelper.getImageProvider(userData.photoUrl),
+                  child: _isUploading
+                      ? const CircularProgressIndicator()
+                      : null,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => _pickImage(uid),
+                child: const CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Color(0xFF9966FF),
+                  child: Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildMainInfoCard(UserModel userData) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            userData.nama ?? 'Tutor Name',
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            userData.school ?? "Kategori Belum Diisi",
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.location_on, size: 18, color: Colors.redAccent),
+              const SizedBox(width: 4),
+              Text(
+                userData.location ?? "Indonesia",
+                style: const TextStyle(color: Colors.black54),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _showEditProfileDialog(userData),
+              icon: const Icon(Icons.edit_note, color: Colors.white),
+              label: const Text(
+                "Edit Profil",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6C4FD8),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAboutCard(UserModel userData) {
+    return _buildSectionCard(
+      title: "Tentang",
+      content: Text(
+        userData.bio ?? "Belum ada deskripsi profil.",
+        style: const TextStyle(color: Colors.black87, height: 1.5),
+      ),
+    );
+  }
+
+  Widget _buildContactCard(UserModel userData) {
+    return _buildSectionCard(
+      title: "Informasi Kontak",
+      content: Column(
+        children: [
+          _buildInfoRow(Icons.email_outlined, "Email", userData.email),
+          const Divider(height: 24),
+          _buildInfoRow(
+            Icons.phone_android_outlined,
+            "Telepon",
+            userData.phone ?? "Belum diisi",
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({required String title, required Widget content}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Color(0xFF6C4FD8),
+            ),
+          ),
+          const SizedBox(height: 15),
+          content,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 18,
+          backgroundColor: const Color(0xFF6C4FD8).withOpacity(0.1),
+          child: Icon(icon, size: 18, color: const Color(0xFF6C4FD8)),
+        ),
+        const SizedBox(width: 15),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: [
+          const UserAccountsDrawerHeader(
+            decoration: BoxDecoration(color: Color(0xFF6C4FD8)),
+            accountName: Text("Pengaturan Akun"),
+            accountEmail: Text("Brilliant Education"),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Icon(Icons.settings, color: Color(0xFF6C4FD8)),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text(
+              "Logout",
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+            onTap: () {
+              FirebaseService.logout();
+              context.pushAndRemoveAll(const LoginScreen());
+            },
+          ),
+        ],
+      ),
     );
   }
 }

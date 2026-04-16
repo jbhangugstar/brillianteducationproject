@@ -5,6 +5,8 @@ import 'package:brillianteducationproject/view/tutorview/buat_kelas_baru2.dart';
 import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
 import 'package:brillianteducationproject/database/preference.dart';
+import 'package:brillianteducationproject/service/firebase_service.dart';
+import 'package:brillianteducationproject/helper/image_helper.dart';
 import 'package:flutter/material.dart';
 
 class JadwalKelas {
@@ -368,7 +370,7 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
                   border: Border.all(color: Colors.grey.shade400),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: coverImage == null
+                child: (coverImage == null && (widget.kelas?.foto == null || widget.kelas!.foto!.isEmpty))
                     ? const Center(
                         child: Text(
                           "Upload Gambar Sampul",
@@ -377,7 +379,9 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
                       )
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.file(coverImage!, fit: BoxFit.cover),
+                        child: coverImage != null 
+                          ? Image.file(coverImage!, fit: BoxFit.cover)
+                          : ImageHelper.buildImage(widget.kelas!.foto!, fit: BoxFit.cover),
                       ),
               ),
             ),
@@ -414,6 +418,14 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
                       }
 
                       final tutorId = await PreferenceHandler.getTutorId();
+                      
+                      String base64Image = "";
+                      if (coverImage != null) {
+                        base64Image = await FirebaseService.imageToBase64(coverImage!) ?? "";
+                      } else if (widget.kelas?.foto != null) {
+                        base64Image = widget.kelas!.foto!;
+                      }
+
                       context.push(
                         BuatKelasStep2Screen(
                           namaKelas: namaKelasController.text,
@@ -422,7 +434,7 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
                           harga: hargaController.text,
                           tutor: tutorController.text,
                           deskripsi: deskripsiController.text,
-                          gambar: coverImage?.path ?? "",
+                          gambar: base64Image,
                           kelasId: widget.kelas?.id,
                           tutorId: tutorId,
                         ),

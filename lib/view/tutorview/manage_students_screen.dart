@@ -19,11 +19,8 @@ class ManageStudentsScreen extends StatefulWidget {
 
 class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
   late Future<List<EnrollmentModel>> studentsFuture;
-  List<EnrollmentModel> allEnrollments = [];
-  List<EnrollmentModel> filteredEnrollments = [];
   String searchQuery = '';
   String filterStatus = 'Semua';
-  bool isAuthorized = true;
 
   final List<String> statusOptions = [
     'Semua',
@@ -46,26 +43,6 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
     });
   }
 
-  void _filterEnrollments() {
-    setState(() {
-      filteredEnrollments = allEnrollments.where((enrollment) {
-        final matchesSearch =
-            enrollment.namaSiswa.toLowerCase().contains(
-              searchQuery.toLowerCase(),
-            ) ||
-            enrollment.emailSiswa.toLowerCase().contains(
-              searchQuery.toLowerCase(),
-            );
-
-        final matchesStatus =
-            filterStatus == 'Semua' ||
-            enrollment.status.toLowerCase() == filterStatus.toLowerCase();
-
-        return matchesSearch && matchesStatus;
-      }).toList();
-    });
-  }
-
   void _removeStudent(String enrollmentId) {
     showDialog(
       context: context,
@@ -84,20 +61,24 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
               Navigator.pop(context);
               try {
                 await EnrollmentController.deleteEnrollment(enrollmentId);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Siswa berhasil dihapus"),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Siswa berhasil dihapus"),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
                 _loadData();
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Gagal menghapus siswa: $e"),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Gagal menghapus siswa: $e"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -140,24 +121,40 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
             return Center(child: Text("Gagal memuat data: ${snapshot.error}"));
           }
 
-          allEnrollments = snapshot.data ?? [];
-          _filterEnrollments();
+          final allEnrollments = snapshot.data ?? [];
 
           if (allEnrollments.isEmpty) {
             return _buildEmptyState();
           }
 
+          // LOGIKA FILTER: Dilakukan di dalam build, bukan pakai setState
+          final filteredList = allEnrollments.where((enrollment) {
+            final matchesSearch =
+                enrollment.namaSiswa.toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                ) ||
+                enrollment.emailSiswa.toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                );
+
+            final matchesStatus =
+                filterStatus == 'Semua' ||
+                enrollment.status.toLowerCase() == filterStatus.toLowerCase();
+
+            return matchesSearch && matchesStatus;
+          }).toList();
+
           return Column(
             children: [
               _buildFilterSection(),
               Expanded(
-                child: filteredEnrollments.isEmpty
+                child: filteredList.isEmpty
                     ? const Center(child: Text("Siswa tidak ditemukan"))
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: filteredEnrollments.length,
+                        itemCount: filteredList.length,
                         itemBuilder: (context, index) {
-                          return _buildStudentCard(filteredEnrollments[index]);
+                          return _buildStudentCard(filteredList[index]);
                         },
                       ),
               ),
@@ -176,8 +173,9 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
         children: [
           TextField(
             onChanged: (value) {
-              searchQuery = value;
-              _filterEnrollments();
+              setState(() {
+                searchQuery = value;
+              });
             },
             decoration: InputDecoration(
               hintText: "Cari nama atau email...",
@@ -203,7 +201,6 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
                       setState(() {
                         filterStatus = status;
                       });
-                      _filterEnrollments();
                     },
                     selectedColor: const Color(0xFF6C4FD8).withOpacity(0.2),
                     checkmarkColor: const Color(0xFF6C4FD8),
@@ -241,7 +238,9 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
         leading: CircleAvatar(
           backgroundColor: const Color(0xFF6C4FD8),
           child: Text(
-            enrollment.namaSiswa.substring(0, 1).toUpperCase(),
+            enrollment.namaSiswa.isNotEmpty
+                ? enrollment.namaSiswa[0].toUpperCase()
+                : "?",
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -73,20 +74,30 @@ class FirebaseService {
 
   static Future<String?> uploadProfileImage(File image, String uid) async {
     try {
-      final ref = _storage.ref().child('profile_photos').child('$uid.jpg');
-      await ref.putFile(image);
-      final url = await ref.getDownloadURL();
-      await _firestore.collection('users').doc(uid).update({'photoUrl': url});
-      return url;
+      final String? base64Image = await imageToBase64(image);
+      if (base64Image != null) {
+        await _firestore.collection('users').doc(uid).update({'photoUrl': base64Image});
+      }
+      return base64Image;
     } catch (e) {
       print('Upload error: $e');
       return null;
     }
   }
 
+  static Future<String?> imageToBase64(File image) async {
+    try {
+      final bytes = await image.readAsBytes();
+      return base64Encode(bytes);
+    } catch (e) {
+      print('Error converting image to base64: $e');
+      return null;
+    }
+  }
+
   static Future<void> deleteProfileImage(String uid) async {
     try {
-      await _storage.ref().child('profile_photos').child('$uid.jpg').delete();
+      // With base64 we just remove the string from firestore
       await _firestore.collection('users').doc(uid).update({'photoUrl': null});
     } catch (e) {
       print('Delete photo error: $e');

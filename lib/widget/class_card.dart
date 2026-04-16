@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:brillianteducationproject/helper/image_helper.dart';
 import 'package:flutter/material.dart';
 
 class ClassCard extends StatelessWidget {
@@ -103,11 +103,10 @@ class ClassCard extends StatelessWidget {
 
             // GAMBAR SAMPUL KELAS
             if (foto != null && foto!.isNotEmpty)
-              Container(
+              ImageHelper.buildImage(
+                foto,
                 width: double.infinity,
                 height: 140,
-                decoration: const BoxDecoration(color: Colors.grey),
-                child: _buildImage(foto!),
               ),
 
             // Content
@@ -246,76 +245,6 @@ class ClassCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildImage(String fotoPath) {
-    if (fotoPath.isEmpty) {
-      return Container(
-        width: double.infinity,
-        height: 140,
-        color: Colors.grey[300],
-        child: const Icon(Icons.image_outlined, color: Colors.grey),
-      );
-    }
-
-    // Check if it's a network URL
-    if (fotoPath.startsWith('http://') || fotoPath.startsWith('https://')) {
-      return Image.network(
-        fotoPath,
-        width: double.infinity,
-        height: 140,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: double.infinity,
-            height: 140,
-            color: Colors.grey[300],
-            child: const Icon(Icons.error_outline, color: Colors.grey),
-          );
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          );
-        },
-      );
-    }
-
-    try {
-      final file = File(fotoPath);
-      if (file.existsSync()) {
-        return Image.file(
-          file,
-          width: double.infinity,
-          height: 140,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              width: double.infinity,
-              height: 140,
-              color: Colors.grey[300],
-              child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
-            );
-          },
-        );
-      }
-    } catch (e) {
-      print('Error loading image: $e');
-    }
-
-    // Fallback if image not found or invalid path
-    return Container(
-      width: double.infinity,
-      height: 140,
-      color: Colors.grey[300],
-      child: const Icon(Icons.image_outlined, color: Colors.grey),
     );
   }
 }

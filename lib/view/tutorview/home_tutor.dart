@@ -1,6 +1,7 @@
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
 import 'package:brillianteducationproject/models/user_model.dart';
+import 'package:brillianteducationproject/helper/image_helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -51,10 +52,7 @@ class _HomeTutorScreenState extends State<HomeTutorScreen> {
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundImage: userData?.photoUrl != null
-                      ? NetworkImage(userData!.photoUrl!)
-                      : const AssetImage("assets/image/applogo.png")
-                            as ImageProvider,
+                  backgroundImage: ImageHelper.getImageProvider(userData?.photoUrl),
                 ),
                 const SizedBox(width: 12),
                 Column(

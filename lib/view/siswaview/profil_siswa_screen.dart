@@ -5,6 +5,7 @@ import 'package:brillianteducationproject/models/user_model.dart';
 import 'package:brillianteducationproject/service/firebase_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:brillianteducationproject/helper/image_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -111,10 +112,7 @@ class _ProfilSiswaScreenState extends State<ProfilSiswaScreen> {
                       CircleAvatar(
                         radius: 60,
                         backgroundColor: Colors.grey.shade200,
-                        backgroundImage: userData.photoUrl != null
-                            ? NetworkImage(userData.photoUrl!)
-                            : const AssetImage('assets/image/applogo.png')
-                                as ImageProvider,
+                        backgroundImage: ImageHelper.getImageProvider(userData.photoUrl),
                         child: _isUploading
                             ? const CircularProgressIndicator()
                             : null,
