@@ -19,17 +19,22 @@ class _KelasSiswaScreenState extends State<KelasSiswaScreen> {
 
   bool isLoading = true;
 
-  String selectedCategory = 'Semua';
+  String selectedCategory = 'All';
   String searchQuery = '';
 
   final List<String> categories = [
-    'Semua',
-    'Matematika',
-    'Bahasa',
-    'Sains',
-    'IPS',
-    'Teknologi',
-    'Seni',
+    "All",
+    "Science",
+    "Literature",
+    "Languages",
+    "Programming & Technology",
+    "Business & Economics",
+    "Design & Creativity",
+    "Test Preparation",
+    "Music & Arts",
+    "Personal Development",
+    "Basic Computer Skills",
+    "School Subjects",
   ];
 
   @override
@@ -70,7 +75,7 @@ class _KelasSiswaScreenState extends State<KelasSiswaScreen> {
       }).toList();
     }
 
-    if (selectedCategory != 'Semua') {
+    if (selectedCategory != 'All') {
       result = result
           .where((kelas) => kelas.kategori == selectedCategory)
           .toList();

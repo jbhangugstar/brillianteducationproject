@@ -152,41 +152,41 @@ class _HomeSiswaScreenState extends State<HomeSiswaScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CategoryItem(
-                        icon: Icons.menu_book,
-                        label: "Matematika",
+                        icon: Icons.science,
+                        label: "Science",
                         color: const Color(0xffEAD9FF),
                         onTap: () {
                           setState(() {
                             _kelasFuture =
-                                KelasController.getKelasByKategori("Matematika");
+                                KelasController.getKelasByKategori("Science");
                           });
                         },
                       ),
                       CategoryItem(
                         icon: Icons.language,
-                        label: "Bahasa",
+                        label: "Languages",
                         color: const Color(0xffD9E7FF),
                         onTap: () {
                           setState(() {
                             _kelasFuture =
-                                KelasController.getKelasByKategori("Bahasa");
+                                KelasController.getKelasByKategori("Languages");
                           });
                         },
                       ),
                       CategoryItem(
-                        icon: Icons.science,
-                        label: "Sains",
+                        icon: Icons.computer,
+                        label: "Technology",
                         color: const Color(0xffD9FFE4),
                         onTap: () {
                           setState(() {
                             _kelasFuture =
-                                KelasController.getKelasByKategori("Sains");
+                                KelasController.getKelasByKategori("Programming & Technology");
                           });
                         },
                       ),
                       CategoryItem(
                         icon: Icons.all_inclusive,
-                        label: "Semua",
+                        label: "All",
                         color: const Color(0xffFFE8CC),
                         onTap: () => _refreshData(),
                       ),

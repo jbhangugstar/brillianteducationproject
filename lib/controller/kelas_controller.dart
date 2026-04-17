@@ -76,7 +76,8 @@ class KelasController {
           .where((e) =>
               e.namaKelas.toLowerCase().contains(keyword.toLowerCase()) ||
               (e.deskripsi?.toLowerCase().contains(keyword.toLowerCase()) ??
-                  false))
+                  false) ||
+              e.tutor.toLowerCase().contains(keyword.toLowerCase()))
           .toList();
     } catch (e) {
       print("Error searchKelas: $e");
