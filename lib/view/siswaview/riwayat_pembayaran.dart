@@ -82,7 +82,7 @@ class _RiwayatPembayaranScreenState extends State<RiwayatPembayaranScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.receipt_long_outlined, size: 80, color: Colors.grey.withOpacity(0.3)),
+          Icon(Icons.receipt_long_outlined, size: 80, color: Colors.grey.withValues(alpha: 0.3)),
           const SizedBox(height: 16),
           const Text(
             "Belum ada riwayat pembayaran",

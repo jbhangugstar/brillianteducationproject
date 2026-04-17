@@ -272,7 +272,9 @@ class _RegistertutorScreenState extends State<RegistertutorScreen> {
                           if (registeredUser.id != null) {
                             await prefs.storingTutorId(registeredUser.id!);
                           }
-                          context.pushAndRemoveAll(const TutorMainScreen());
+                          if (context.mounted) {
+                            context.pushAndRemoveAll(const TutorMainScreen());
+                          }
                         }
                       } catch (e) {
                         if (context.mounted) {

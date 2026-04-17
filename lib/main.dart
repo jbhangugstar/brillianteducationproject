@@ -1,19 +1,51 @@
 import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/firebase_options.dart';
+import 'package:brillianteducationproject/helper/role_helper.dart'; // Import RoleHelper
 import 'package:brillianteducationproject/view/login_screen.dart';
+import 'package:brillianteducationproject/view/siswaview/siswa_main_screen.dart'; // Import Screen Siswa
+import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart'; // Import Screen Tutor
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = PreferenceHandler();
-  await prefs.init();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+
+  try {
+    debugPrint("== STARTING INITIALIZATION ==");
+
+    // 1. Inisialisasi Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    // 2. Inisialisasi Preferences
+    final prefs = PreferenceHandler();
+    await prefs.init().timeout(const Duration(seconds: 5));
+
+    // 3. Ambil Status Login dan Role
+    bool isLoggedIn = await prefs.getIsLogin() ?? false;
+    String? role = await prefs.getUserRole();
+
+    debugPrint("Auth Status: $isLoggedIn, Role: $role");
+
+    // 4. Jalankan Aplikasi dengan data yang sudah didapat
+    runApp(MyApp(isLoggedIn: isLoggedIn, role: role));
+  } catch (e, stackTrace) {
+    debugPrint("CRITICAL ERROR: $e");
+    // Tampilan Error jika inisialisasi gagal (kode kamu sudah bagus di sini)
+    runApp(
+      MaterialApp(
+        home: Scaffold(body: Center(child: Text("Gagal Memuat Aplikasi: $e"))),
+      ),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  final String? role;
+
+  const MyApp({super.key, required this.isLoggedIn, this.role});
 
   @override
   Widget build(BuildContext context) {
@@ -24,93 +56,25 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      // LOGIKA NAVIGASI ROLE DI SINI
+      home: _getHome(),
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  Widget _getHome() {
+    // Jika belum login, ke Login Screen
+    if (!isLoggedIn) {
+      return const LoginScreen();
+    }
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
+    // Jika sudah login, cek rolenya
+    if (role == RoleHelper.siswa) {
+      return const SiswaMainScreen();
+    } else if (role == RoleHelper.tutor) {
+      return const TutorMainScreen();
+    } else {
+      // Jaga-jaga jika role kosong tapi status login true
+      return const LoginScreen();
+    }
   }
 }

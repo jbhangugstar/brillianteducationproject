@@ -50,7 +50,7 @@ class _SearchBarState extends State<SearchBar> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -76,7 +76,7 @@ class _SearchBarState extends State<SearchBar> {
           ),
           hintText: widget.hintText,
           hintStyle: TextStyle(
-            color: Colors.grey.withOpacity(0.6),
+            color: Colors.grey.withValues(alpha: 0.6),
             fontSize: 14,
           ),
           border: InputBorder.none,
@@ -84,7 +84,7 @@ class _SearchBarState extends State<SearchBar> {
             widget.prefixIcon,
             color: _isActive
                 ? const Color(0xFF6C4FD8)
-                : Colors.grey.withOpacity(0.5),
+                : Colors.grey.withValues(alpha: 0.5),
             size: 20,
           ),
           suffixIcon: _isActive && widget.suffixIcon != null

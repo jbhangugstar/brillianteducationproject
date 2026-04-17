@@ -6,7 +6,7 @@ import 'package:brillianteducationproject/service/firebase_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brillianteducationproject/helper/image_helper.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -22,7 +22,10 @@ class _ProfilSiswaScreenState extends State<ProfilSiswaScreen> {
   bool _isUploading = false;
 
   Future<void> _pickImage(String uid) async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+    );
     if (image != null) {
       setState(() => _isUploading = true);
       await FirebaseService.uploadProfileImage(File(image.path), uid);
@@ -30,20 +33,35 @@ class _ProfilSiswaScreenState extends State<ProfilSiswaScreen> {
     }
   }
 
-  void _showEditNameDialog(UserModel user) {
-    final controller = TextEditingController(text: user.nama);
+  void _showEditProfileDialog(UserModel user) {
+    final nameController = TextEditingController(text: user.nama);
+    final phoneController = TextEditingController(text: user.phone);
+    final schoolController = TextEditingController(text: user.school);
+    final locationController = TextEditingController(text: user.location);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Edit Nama"),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: "Masukkan nama baru"),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Edit Profil", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildEditTextField(nameController, "Nama Lengkap", Icons.person),
+              const SizedBox(height: 12),
+              _buildEditTextField(phoneController, "Nomor Telepon", Icons.phone),
+              const SizedBox(height: 12),
+              _buildEditTextField(schoolController, "Sekolah/Kelas", Icons.book),
+              const SizedBox(height: 12),
+              _buildEditTextField(locationController, "Lokasi", Icons.location_on),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Batal"),
+            child: const Text("Batal", style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -51,16 +69,36 @@ class _ProfilSiswaScreenState extends State<ProfilSiswaScreen> {
                 id: user.id,
                 email: user.email,
                 password: user.password,
-                nama: controller.text,
+                nama: nameController.text,
+                phone: phoneController.text,
+                school: schoolController.text,
+                location: locationController.text,
                 role: user.role,
                 photoUrl: user.photoUrl,
+                bio: user.bio,
               );
               await FirebaseService.updateUserProfile(updatedUser);
-              if (mounted) Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context);
             },
-            child: const Text("Simpan"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFB23AEE),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text("Simpan", style: TextStyle(color: Colors.white)),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEditTextField(TextEditingController controller, String label, IconData icon) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 20),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     );
   }
@@ -186,7 +224,7 @@ class _ProfilSiswaScreenState extends State<ProfilSiswaScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () => _showEditNameDialog(userData),
+                    onPressed: () => _showEditProfileDialog(userData),
                     icon: const Icon(Icons.edit, color: Colors.white),
                     label: const Text(
                       'Edit Profil',

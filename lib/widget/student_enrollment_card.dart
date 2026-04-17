@@ -41,7 +41,7 @@ class StudentEnrollmentCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
         ),
         child: Column(
           children: [
@@ -79,7 +79,7 @@ class StudentEnrollmentCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(statusEnrollment).withOpacity(0.2),
+                    color: _getStatusColor(statusEnrollment).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -113,7 +113,7 @@ class StudentEnrollmentCard extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: nilaiProgress / 100,
                           minHeight: 6,
-                          backgroundColor: Colors.grey.withOpacity(0.2),
+                          backgroundColor: Colors.grey.withValues(alpha: 0.2),
                           valueColor: AlwaysStoppedAnimation<Color>(
                             nilaiProgress >= 80
                                 ? Colors.green

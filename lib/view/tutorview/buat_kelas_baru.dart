@@ -8,6 +8,41 @@ import 'package:brillianteducationproject/database/preference.dart';
 import 'package:brillianteducationproject/service/firebase_service.dart';
 import 'package:brillianteducationproject/helper/image_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+
+class CurrencyFormat extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    String cleaned = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleaned.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    String result = '';
+    int count = 0;
+    for (int i = cleaned.length - 1; i >= 0; i--) {
+      if (count == 3) {
+        result = '.' + result;
+        count = 0;
+      }
+      result = cleaned[i] + result;
+      count++;
+    }
+
+    return TextEditingValue(
+      text: result,
+      selection: TextSelection.collapsed(offset: result.length),
+    );
+  }
+}
 
 class JadwalKelas {
   String hari;
@@ -95,7 +130,18 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
 
     if (widget.kelas != null) {
       namaKelasController.text = widget.kelas!.namaKelas;
-      hargaController.text = widget.kelas!.harga.toString();
+      String hargaStr = widget.kelas!.harga.toString();
+      String result = '';
+      int count = 0;
+      for (int i = hargaStr.length - 1; i >= 0; i--) {
+        if (count == 3) {
+          result = '.' + result;
+          count = 0;
+        }
+        result = hargaStr[i] + result;
+        count++;
+      }
+      hargaController.text = result;
       tutorController.text = widget.kelas!.tutor;
       deskripsiController.text = widget.kelas!.deskripsi ?? "";
 
@@ -169,6 +215,7 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
                       ),
                     );
                   });
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                 }
               },
@@ -335,7 +382,8 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
             TextField(
               controller: hargaController,
               keyboardType: TextInputType.number,
-              decoration: inputDecoration("Contoh: 50000"),
+              inputFormatters: [CurrencyFormat()],
+              decoration: inputDecoration("Contoh: 50.000"),
             ),
             const SizedBox(height: 20),
             const Text("Tutor", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -370,7 +418,10 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
                   border: Border.all(color: Colors.grey.shade400),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: (coverImage == null && (widget.kelas?.foto == null || widget.kelas!.foto!.isEmpty))
+                child:
+                    (coverImage == null &&
+                        (widget.kelas?.foto == null ||
+                            widget.kelas!.foto!.isEmpty))
                     ? const Center(
                         child: Text(
                           "Upload Gambar Sampul",
@@ -379,9 +430,12 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
                       )
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: coverImage != null 
-                          ? Image.file(coverImage!, fit: BoxFit.cover)
-                          : ImageHelper.buildImage(widget.kelas!.foto!, fit: BoxFit.cover),
+                        child: coverImage != null
+                            ? Image.file(coverImage!, fit: BoxFit.cover)
+                            : ImageHelper.buildImage(
+                                widget.kelas!.foto!,
+                                fit: BoxFit.cover,
+                              ),
                       ),
               ),
             ),
@@ -417,21 +471,27 @@ class _BuatKelasBaruState extends State<BuatKelasBaruScreen> {
                         return;
                       }
 
-                      final tutorId = await PreferenceHandler.getTutorId();
-                      
+                      final tutorId = await PreferenceHandler().getTutorId();
+
                       String base64Image = "";
                       if (coverImage != null) {
-                        base64Image = await FirebaseService.imageToBase64(coverImage!) ?? "";
+                        base64Image =
+                            await FirebaseService.imageToBase64(coverImage!) ??
+                            "";
                       } else if (widget.kelas?.foto != null) {
                         base64Image = widget.kelas!.foto!;
                       }
 
+                      if (!context.mounted) return;
                       context.push(
                         BuatKelasStep2Screen(
                           namaKelas: namaKelasController.text,
                           kategori: kategoriController ?? "",
                           jadwal: getJadwalString(),
-                          harga: hargaController.text,
+                          harga: hargaController.text.replaceAll(
+                            RegExp(r'[^0-9]'),
+                            '',
+                          ),
                           tutor: tutorController.text,
                           deskripsi: deskripsiController.text,
                           gambar: base64Image,

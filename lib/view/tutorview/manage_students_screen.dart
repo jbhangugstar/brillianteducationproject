@@ -62,6 +62,7 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
               try {
                 await EnrollmentController.deleteEnrollment(enrollmentId);
                 if (mounted) {
+                  // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text("Siswa berhasil dihapus"),
@@ -72,6 +73,7 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
                 _loadData();
               } catch (e) {
                 if (mounted) {
+                  // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text("Gagal menghapus siswa: $e"),
@@ -202,7 +204,7 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
                         filterStatus = status;
                       });
                     },
-                    selectedColor: const Color(0xFF6C4FD8).withOpacity(0.2),
+                    selectedColor: const Color(0xFF6C4FD8).withValues(alpha: 0.2),
                     checkmarkColor: const Color(0xFF6C4FD8),
                     labelStyle: TextStyle(
                       color: isSelected
@@ -315,7 +317,7 @@ class _ManageStudentsScreenState extends State<ManageStudentsScreen> {
           Icon(
             Icons.people_outline,
             size: 80,
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           const Text(

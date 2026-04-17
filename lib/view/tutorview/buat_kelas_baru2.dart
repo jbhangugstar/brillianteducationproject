@@ -1,7 +1,8 @@
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/extension/navigator.dart';
-import 'package:brillianteducationproject/models/kelas_model.dart';
 import 'package:brillianteducationproject/view/tutorview/tutor_main_screen.dart';
+import 'package:brillianteducationproject/models/kelas_model.dart';
+import 'package:brillianteducationproject/helper/currency_helper.dart';
 import 'package:flutter/material.dart';
 
 class BuatKelasStep2Screen extends StatefulWidget {
@@ -143,7 +144,7 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                   ),
                 ],
@@ -159,7 +160,7 @@ class _BuatKelasStep2ScreenState extends State<BuatKelasStep2Screen> {
                   _buildReviewItem('Nama Kelas', widget.namaKelas),
                   _buildReviewItem('Kategori', widget.kategori),
                   _buildReviewItem('Jadwal', widget.jadwal),
-                  _buildReviewItem('Harga', 'Rp ${widget.harga}'),
+                  _buildReviewItem('Harga', CurrencyHelper.formatRupiah(int.tryParse(widget.harga) ?? 0)),
                   _buildReviewItem('Tutor', widget.tutor),
                   _buildReviewItem(
                     'Deskripsi',

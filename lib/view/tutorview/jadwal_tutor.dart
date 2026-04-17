@@ -1,9 +1,11 @@
-import 'dart:io';
+
 import 'package:brillianteducationproject/extension/navigator.dart';
 import 'package:brillianteducationproject/view/tutorview/buat_kelas_baru.dart';
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
 import 'package:brillianteducationproject/view/tutorview/manage_students_screen.dart';
+import 'package:brillianteducationproject/helper/image_helper.dart';
+import 'package:brillianteducationproject/helper/currency_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -123,7 +125,7 @@ class _JadwalTutorScreenState extends State<JadwalTutorScreen> {
           Icon(
             Icons.class_outlined,
             size: 80,
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -139,54 +141,13 @@ class _JadwalTutorScreenState extends State<JadwalTutorScreen> {
     );
   }
 
-  Widget _buildImage(String? fotoPath) {
-    if (fotoPath == null || fotoPath.isEmpty) {
-      return Container(
-        width: double.infinity,
-        height: 140,
-        color: Colors.grey[200],
-        child: const Icon(Icons.image_outlined, color: Colors.grey),
-      );
-    }
-
-    if (fotoPath.startsWith('http://') || fotoPath.startsWith('https://')) {
-      return Image.network(
-        fotoPath,
-        width: double.infinity,
-        height: 140,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
-          color: Colors.grey[200],
-          child: const Icon(Icons.broken_image, color: Colors.grey),
-        ),
-      );
-    }
-
-    final file = File(fotoPath);
-    if (file.existsSync()) {
-      return Image.file(
-        file,
-        width: double.infinity,
-        height: 140,
-        fit: BoxFit.cover,
-      );
-    }
-
-    return Container(
-      width: double.infinity,
-      height: 140,
-      color: Colors.grey[200],
-      child: const Icon(Icons.image_outlined, color: Colors.grey),
-    );
-  }
-
   Widget kelasCard({
     required BuildContext context,
     required Kelas kelas,
     required VoidCallback onRefresh,
   }) {
     final title = kelas.namaKelas;
-    final price = 'Rp ${kelas.harga}';
+    final price = CurrencyHelper.formatRupiah(kelas.harga);
     final schedule = kelas.jadwal;
     final students = '${kelas.jumlahSiswa ?? 0} siswa';
     final status = kelas.status ?? 'aktif';
@@ -201,7 +162,15 @@ class _JadwalTutorScreenState extends State<JadwalTutorScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildImage(kelas.foto),
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: ImageHelper.buildImage(
+              kelas.foto,
+              width: double.infinity,
+              height: 140,
+              fit: BoxFit.cover,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -225,7 +194,7 @@ class _JadwalTutorScreenState extends State<JadwalTutorScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.1),
+                        color: statusColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -330,11 +299,13 @@ class _JadwalTutorScreenState extends State<JadwalTutorScreen> {
                           );
                           if (confirm == true) {
                             await KelasController.deleteKelas(kelas.id!);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Kelas berhasil dihapus"),
-                              ),
-                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Kelas berhasil dihapus"),
+                                ),
+                              );
+                            }
                             onRefresh();
                           }
                         }

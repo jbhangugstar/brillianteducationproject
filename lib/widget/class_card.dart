@@ -1,4 +1,5 @@
 import 'package:brillianteducationproject/helper/image_helper.dart';
+import 'package:brillianteducationproject/helper/currency_helper.dart';
 import 'package:flutter/material.dart';
 
 class ClassCard extends StatelessWidget {
@@ -40,7 +41,7 @@ class ClassCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -70,7 +71,7 @@ class ClassCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -198,7 +199,7 @@ class ClassCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Rp ${harga.toString()}',
+                            CurrencyHelper.formatRupiah(harga),
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,

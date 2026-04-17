@@ -211,15 +211,14 @@ class _HomeTutorScreenState extends State<HomeTutorScreen> {
                             (kelas) => Padding(
                               padding: const EdgeInsets.only(bottom: 10),
                               child: scheduleCard(
-                                day:
-                                    (kelas.kategori != null &&
-                                                kelas.kategori!.length >= 3
-                                            ? kelas.kategori!.substring(0, 3)
-                                            : kelas.kategori ?? "GEN")
-                                        .toUpperCase(),
+                                day: (kelas.kategori != null &&
+                                        kelas.kategori!.length >= 3)
+                                    ? kelas.kategori!.substring(0, 3).toUpperCase()
+                                    : (kelas.kategori ?? "GEN").toUpperCase(),
                                 date: "${kelas.rating ?? 0}",
                                 subject: kelas.namaKelas,
                                 time: kelas.jadwal,
+                                foto: kelas.foto,
                               ),
                             ),
                           ),
@@ -298,6 +297,7 @@ class _HomeTutorScreenState extends State<HomeTutorScreen> {
     required String date,
     required String subject,
     required String time,
+    String? foto,
   }) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -307,26 +307,35 @@ class _HomeTutorScreenState extends State<HomeTutorScreen> {
       ),
       child: Row(
         children: [
-          /// DATE BOX (Used for category/rating display)
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE8EAF6),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(day, style: const TextStyle(fontSize: 10)),
-                Text(
-                  date,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+          /// CLASS IMAGE or DATE BOX
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: ImageHelper.buildImage(
+              foto,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+              errorWidget: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8EAF6),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(day, style: const TextStyle(fontSize: 10)),
+                    Text(
+                      date,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 12),

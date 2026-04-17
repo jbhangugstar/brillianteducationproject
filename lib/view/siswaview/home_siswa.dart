@@ -1,6 +1,8 @@
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:brillianteducationproject/helper/image_helper.dart';
+import 'package:brillianteducationproject/helper/currency_helper.dart';
+
 import 'package:flutter/material.dart';
 
 class HomeSiswaScreen extends StatefulWidget {
@@ -71,7 +73,7 @@ class _HomeSiswaScreenState extends State<HomeSiswaScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: TextField(
@@ -305,7 +307,7 @@ class KelasCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -313,14 +315,20 @@ class KelasCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            height: 60,
-            width: 60,
-            decoration: BoxDecoration(
-              color: Colors.purple.shade50,
-              borderRadius: BorderRadius.circular(12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: ImageHelper.buildImage(
+              kelas.foto,
+              width: 60,
+              height: 60,
+              fit: BoxFit.cover,
+              errorWidget: Container(
+                height: 60,
+                width: 60,
+                color: Colors.purple.shade50,
+                child: const Icon(Icons.book, color: Colors.purple, size: 30),
+              ),
             ),
-            child: const Icon(Icons.book, color: Colors.purple, size: 30),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -332,7 +340,7 @@ class KelasCard extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  "Rp ${kelas.harga}",
+                  CurrencyHelper.formatRupiah(kelas.harga),
                   style: const TextStyle(color: Colors.purple, fontSize: 13),
                 ),
                 Row(

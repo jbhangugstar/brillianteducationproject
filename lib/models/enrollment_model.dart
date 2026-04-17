@@ -45,7 +45,7 @@ class EnrollmentModel {
       namaKelas: map['nama_kelas'],
       tanggalDaftar: map['tanggal_daftar'],
       status: map['status'],
-      nilaiProgress: map['nilai_progress'],
+      nilaiProgress: (map['nilai_progress'] as num?)?.toDouble(),
     );
   }
 }

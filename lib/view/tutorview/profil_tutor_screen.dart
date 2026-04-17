@@ -22,7 +22,10 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
   bool _isUploading = false;
 
   Future<void> _pickImage(String uid) async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+    );
     if (image != null) {
       setState(() => _isUploading = true);
       await FirebaseService.uploadProfileImage(File(image.path), uid);
@@ -34,6 +37,7 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
     final nameController = TextEditingController(text: user.nama);
     final bioController = TextEditingController(text: user.bio);
     final schoolController = TextEditingController(text: user.school);
+    final phoneController = TextEditingController(text: user.phone);
 
     showDialog(
       context: context,
@@ -53,6 +57,12 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
                 schoolController,
                 "Spesialisasi/Sekolah",
                 Icons.school,
+              ),
+              const SizedBox(height: 12),
+              _buildTextField(
+                phoneController,
+                "Nomor Telepon",
+                Icons.phone,
               ),
               const SizedBox(height: 12),
               _buildTextField(
@@ -80,11 +90,11 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
                 school: schoolController.text,
                 role: user.role,
                 photoUrl: user.photoUrl,
-                phone: user.phone,
+                phone: phoneController.text,
                 location: user.location,
               );
               await FirebaseService.updateUserProfile(updatedUser);
-              if (mounted) Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF9966FF),
@@ -123,8 +133,9 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
   @override
   Widget build(BuildContext context) {
     final authUser = FirebaseAuth.instance.currentUser;
-    if (authUser == null)
+    if (authUser == null) {
       return const Scaffold(body: Center(child: Text("Silakan login kembali")));
+    }
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
@@ -192,7 +203,7 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
                 children: [
                   _buildHeader(userData, authUser.uid),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(20, 5, 20, 20),
                     child: Column(
                       children: [
                         _buildMainInfoCard(userData),
@@ -214,71 +225,74 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
   }
 
   Widget _buildHeader(UserModel userData, String uid) {
-    return Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.center,
-      children: [
-        Container(
-          height: 220,
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(30),
-              bottomRight: Radius.circular(30),
-            ),
-            image: DecorationImage(
-              image: AssetImage("assets/images/library.jpg"),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(
+    return SizedBox(
+      height: 275,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
+        children: [
+          Container(
+            height: 220,
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
               ),
-              color: Colors.black.withOpacity(0.3),
+              image: DecorationImage(
+                image: AssetImage("assets/images/library.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                ),
+                color: Colors.black.withValues(alpha: 0.3),
+              ),
             ),
           ),
-        ),
-        Positioned(
-          bottom: -45,
-          child: Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
+          Positioned(
+            bottom: 0,
+            child: Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 55,
+                    backgroundColor: Colors.grey[200],
+                    backgroundImage: ImageHelper.getImageProvider(userData.photoUrl),
+                    child: _isUploading
+                        ? const CircularProgressIndicator()
+                        : null,
+                  ),
                 ),
-                child: CircleAvatar(
-                  radius: 55,
-                  backgroundColor: Colors.grey[200],
-                  backgroundImage: ImageHelper.getImageProvider(userData.photoUrl),
-                  child: _isUploading
-                      ? const CircularProgressIndicator()
-                      : null,
+                GestureDetector(
+                  onTap: () => _pickImage(uid),
+                  child: const CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Color(0xFF9966FF),
+                    child: Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                  ),
                 ),
-              ),
-              GestureDetector(
-                onTap: () => _pickImage(uid),
-                child: const CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Color(0xFF9966FF),
-                  child: Icon(Icons.camera_alt, size: 18, color: Colors.white),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -290,7 +304,7 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15),
         ],
       ),
       child: Column(
@@ -379,7 +393,7 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -405,7 +419,7 @@ class _ProfilTutorScreenState extends State<ProfilTutorScreen> {
       children: [
         CircleAvatar(
           radius: 18,
-          backgroundColor: const Color(0xFF6C4FD8).withOpacity(0.1),
+          backgroundColor: const Color(0xFF6C4FD8).withValues(alpha: 0.1),
           child: Icon(icon, size: 18, color: const Color(0xFF6C4FD8)),
         ),
         const SizedBox(width: 15),

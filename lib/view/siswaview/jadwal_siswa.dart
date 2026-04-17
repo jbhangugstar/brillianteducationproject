@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:brillianteducationproject/controller/enrollment_controller.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
+import 'package:brillianteducationproject/helper/image_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class JadwalSiswaScreen extends StatefulWidget {
@@ -105,7 +106,7 @@ class _JadwalSiswaScreenState extends State<JadwalSiswaScreen> {
                 Icon(
                   Icons.calendar_today_outlined,
                   size: 80,
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -152,11 +153,19 @@ class _JadwalSiswaScreenState extends State<JadwalSiswaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: ImageHelper.buildImage(
+              kelas.foto,
+              width: double.infinity,
+              height: 140,
+              fit: BoxFit.cover,
+            ),
+          ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: const BoxDecoration(
               color: Color(0xFFF0EFFF),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -7,6 +7,7 @@ import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/controller/enrollment_controller.dart';
 import 'package:brillianteducationproject/widget/student_enrollment_card.dart';
 import 'package:brillianteducationproject/models/enrollment_model.dart';
+import 'package:brillianteducationproject/helper/currency_helper.dart';
 
 class ClassDetailScreen extends StatefulWidget {
   final String kelasId;
@@ -167,7 +168,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Rp ${kelas.harga}',
+                            CurrencyHelper.formatRupiah(kelas.harga),
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -276,8 +277,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         child: StudentEnrollmentCard(
                           namaSiswa: enrollment.namaSiswa,
                           statusEnrollment: enrollment.status,
-                          nilaiProgress: (enrollment.nilaiProgress ?? 0.0)
-                              .toDouble(),
+                          nilaiProgress: enrollment.nilaiProgress ?? 0.0,
                           tanggalDaftar: enrollment.tanggalDaftar,
                         ),
                       );

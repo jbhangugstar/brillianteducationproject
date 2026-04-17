@@ -1,6 +1,7 @@
-import 'dart:io';
 import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
+import 'package:brillianteducationproject/helper/image_helper.dart';
+import 'package:brillianteducationproject/helper/currency_helper.dart';
 import 'package:flutter/material.dart';
 
 class KelasTutorScreen extends StatefulWidget {
@@ -79,7 +80,7 @@ class _KelasTutorScreenState extends State<KelasTutorScreen> {
   Widget kelasCard(Kelas kelas) {
     final title = kelas.namaKelas;
     final tutor = kelas.tutor;
-    final price = 'Rp ${kelas.harga}';
+    final price = CurrencyHelper.formatRupiah(kelas.harga);
     final schedule = kelas.jadwal;
     final students = '${kelas.jumlahSiswa ?? 0} siswa';
     final kategori = kelas.kategori;
@@ -108,7 +109,7 @@ class _KelasTutorScreenState extends State<KelasTutorScreen> {
         boxShadow: [
           BoxShadow(
             blurRadius: 8,
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             offset: const Offset(0, 4),
           ),
         ],
@@ -143,7 +144,7 @@ class _KelasTutorScreenState extends State<KelasTutorScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.2),
+                    color: statusColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -160,22 +161,15 @@ class _KelasTutorScreenState extends State<KelasTutorScreen> {
           ),
 
           /// GAMBAR
-          if (kelas.foto != null && kelas.foto!.isNotEmpty)
-            ClipRRect(
-              child: Image.file(
-                File(kelas.foto!),
-                width: double.infinity,
-                height: 180,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 180,
-                    color: Colors.grey[300],
-                    child: const Center(child: Icon(Icons.image_not_supported)),
-                  );
-                },
-              ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(0), // Keeping it consistent
+            child: ImageHelper.buildImage(
+              kelas.foto,
+              width: double.infinity,
+              height: 180,
+              fit: BoxFit.cover,
             ),
+          ),
 
           /// DETAIL
           Padding(

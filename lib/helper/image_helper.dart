@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class ImageHelper {
   static ImageProvider getImageProvider(String? imageSource) {
-    if (imageSource == null || imageSource.isEmpty) {
+    if (imageSource == null || imageSource.trim().isEmpty) {
       return const AssetImage('assets/image/applogo.png');
     }
 
@@ -13,7 +13,7 @@ class ImageHelper {
       return NetworkImage(imageSource);
     }
 
-    // 2. Check if it's a File path
+    // 2. Check if it's a File path (Local)
     if (imageSource.startsWith('/') || imageSource.contains(':\\') || imageSource.contains(':/')) {
       final file = File(imageSource);
       if (file.existsSync()) {
@@ -28,40 +28,22 @@ class ImageHelper {
 
     // 4. Try to decode as Base64
     try {
-      // Sometimes base64 strings have data:image/...;base64, prefix
       String base64String = imageSource;
       if (imageSource.contains(',')) {
         base64String = imageSource.split(',').last;
       }
+      // Remove whitespace and check if it looks like base64
+      base64String = base64String.replaceAll(RegExp(r'\s+'), '');
       return MemoryImage(base64Decode(base64String));
     } catch (e) {
-      // Fallback if decoding fails
+      debugPrint('ImageHelper: Failed to decode base64 - ${e.toString().substring(0, 50)}...');
       return const AssetImage('assets/image/applogo.png');
     }
   }
 
   static Widget buildImage(String? imageSource, {double? width, double? height, BoxFit fit = BoxFit.cover, Widget? errorWidget}) {
-    if (imageSource == null || imageSource.isEmpty) {
+    if (imageSource == null || imageSource.trim().isEmpty) {
       return errorWidget ?? _buildPlaceholder(width, height);
-    }
-
-    // Base64 handling for Image.memory
-    if (!imageSource.startsWith('http') && !imageSource.startsWith('/') && !imageSource.startsWith('assets/')) {
-        try {
-          String base64String = imageSource;
-          if (imageSource.contains(',')) {
-            base64String = imageSource.split(',').last;
-          }
-          return Image.memory(
-            base64Decode(base64String),
-            width: width,
-            height: height,
-            fit: fit,
-            errorBuilder: (context, error, stackTrace) => errorWidget ?? _buildPlaceholder(width, height),
-          );
-        } catch (e) {
-          // Fall through to other handlers
-        }
     }
 
     // URL handling
@@ -76,7 +58,7 @@ class ImageHelper {
     }
 
     // File handling
-    if (imageSource.startsWith('/') || imageSource.contains(':\\')) {
+    if (imageSource.startsWith('/') || imageSource.contains(':\\') || imageSource.contains(':/')) {
       final file = File(imageSource);
       if (file.existsSync()) {
         return Image.file(
@@ -100,7 +82,27 @@ class ImageHelper {
        );
     }
 
-    return errorWidget ?? _buildPlaceholder(width, height);
+    // Base64 handling
+    try {
+      String base64String = imageSource;
+      if (imageSource.contains(',')) {
+        base64String = imageSource.split(',').last;
+      }
+      base64String = base64String.replaceAll(RegExp(r'\s+'), '');
+      return Image.memory(
+        base64Decode(base64String),
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('ImageHelper: Image.memory error builder triggered');
+          return errorWidget ?? _buildPlaceholder(width, height);
+        },
+      );
+    } catch (e) {
+      debugPrint('ImageHelper: buildImage failed to decode base64');
+      return errorWidget ?? _buildPlaceholder(width, height);
+    }
   }
 
   static Widget _buildPlaceholder(double? width, double? height) {
@@ -108,7 +110,9 @@ class ImageHelper {
       width: width,
       height: height,
       color: Colors.grey[200],
-      child: const Icon(Icons.image, color: Colors.grey),
+      child: Center(
+        child: Icon(Icons.image_not_supported_outlined, color: Colors.grey[400], size: 30),
+      ),
     );
   }
 }

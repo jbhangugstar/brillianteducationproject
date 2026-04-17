@@ -271,7 +271,9 @@ class _RegisterSiswaScreenState extends State<RegisterSiswaScreen> {
                             await prefs.storingStudentId(registeredUser.id!);
                           }
 
-                          context.pushAndRemoveAll(const SiswaMainScreen());
+                          if (context.mounted) {
+                            context.pushAndRemoveAll(const SiswaMainScreen());
+                          }
                         }
                       } catch (e) {
                         if (context.mounted) {

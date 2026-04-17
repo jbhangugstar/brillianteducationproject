@@ -1,83 +1,81 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceHandler {
-  //Inisialisasi Shared Preference
+  // Inisialisasi Singleton
   static final PreferenceHandler _instance = PreferenceHandler._internal();
-  late SharedPreferences _preferences;
+  SharedPreferences? _preferences;
   factory PreferenceHandler() => _instance;
   PreferenceHandler._internal();
+
+  // Method Init yang dipanggil di main.dart
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  //Keys
+  // Keys (Daftar Label Penyimpanan)
   static const String _isLogin = 'isLogin';
   static const String _studentId = 'studentId';
   static const String _userEmail = 'userEmail';
   static const String _tutorId = 'tutorId';
+  static const String _userRole = 'userRole'; // Key baru untuk Role
 
-  //CREATE - Store Login Status
+  // ==========================================
+  // 1. FUNGSI SIMPAN DATA (SETTERS)
+  // ==========================================
+
   Future<void> storingIsLogin(bool isLogin) async {
-    _preferences.setBool(_isLogin, isLogin);
+    await _preferences?.setBool(_isLogin, isLogin);
   }
 
-  //CREATE - Store Student ID
   Future<void> storingStudentId(String id) async {
-    _preferences.setString(_studentId, id);
+    await _preferences?.setString(_studentId, id);
   }
 
-  //CREATE - Store Tutor ID
   Future<void> storingTutorId(String id) async {
-    _preferences.setString(_tutorId, id);
+    await _preferences?.setString(_tutorId, id);
   }
 
-  //CREATE - Store User Email
   Future<void> storingUserEmail(String email) async {
-    _preferences.setString(_userEmail, email);
+    await _preferences?.setString(_userEmail, email);
   }
 
-  //GET - Login Status
-  static Future<bool?> getIsLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    var data = prefs.getBool(_isLogin);
-    return data;
+  // Simpan Role (Siswa atau Tutor)
+  Future<void> storingUserRole(String role) async {
+    await _preferences?.setString(_userRole, role);
   }
 
-  //GET - Student ID
-  static Future<String?> getStudentId() async {
-    final prefs = await SharedPreferences.getInstance();
-    var data = prefs.getString(_studentId);
-    return data;
+  // ==========================================
+  // 2. FUNGSI AMBIL DATA (GETTERS)
+  // ==========================================
+
+  // Perhatikan: Saya hilangkan 'static' agar konsisten menggunakan instance
+  Future<bool?> getIsLogin() async {
+    return _preferences?.getBool(_isLogin);
   }
 
-  //GET - User Email
-  static Future<String?> getUserEmail() async {
-    final prefs = await SharedPreferences.getInstance();
-    var data = prefs.getString(_userEmail);
-    return data;
+  Future<String?> getStudentId() async {
+    return _preferences?.getString(_studentId);
   }
 
-  //DELETE - Clear All
+  Future<String?> getTutorId() async {
+    return _preferences?.getString(_tutorId);
+  }
+
+  Future<String?> getUserEmail() async {
+    return _preferences?.getString(_userEmail);
+  }
+
+  // Ambil Role untuk navigasi di main.dart
+  Future<String?> getUserRole() async {
+    return _preferences?.getString(_userRole);
+  }
+
+  // ==========================================
+  // 3. FUNGSI HAPUS DATA (LOGOUT)
+  // ==========================================
+
   Future<void> clearAllPreferences() async {
-    await _preferences.remove(_isLogin);
-    await _preferences.remove(_studentId);
-    await _preferences.remove(_userEmail);
-  }
-
-  // ========================
-  // GET TUTOR ID
-  // ========================
-  static Future<String?> getTutorId() async {
-    final prefs = await SharedPreferences.getInstance();
-    var data = prefs.getString(_tutorId);
-    return data;
-  }
-
-  // ========================
-  // SET TUTOR ID (misal saat login)
-  // ========================
-  static Future<void> setTutorId(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tutorId, id);
+    // Menghapus semua data yang tersimpan agar aman saat logout
+    await _preferences?.clear();
   }
 }
