@@ -27,13 +27,34 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
   late Future<Kelas?> kelasFuture;
   late Future<List<EnrollmentModel>> studentsFuture;
 
+  bool isEnrolled = false; // 🔥 STATE TAMBAHAN
+
   @override
   void initState() {
     super.initState();
     kelasFuture = KelasController.getKelasById(widget.kelasId);
     studentsFuture = EnrollmentController.getEnrollmentsByClass(widget.kelasId);
+
+    checkEnrollmentStatus(); // 🔥 CEK STATUS
   }
 
+  // 🔥 CEK APAKAH USER SUDAH DAFTAR
+  Future<void> checkEnrollmentStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    bool sudahDaftar = await EnrollmentController.isStudentEnrolled(
+      user.uid,
+      widget.kelasId,
+    );
+
+    setState(() {
+      isEnrolled = sudahDaftar;
+    });
+  }
+
+  // 🔥 FUNCTION DAFTAR
   Future<void> daftarKelas(Kelas kelas) async {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -104,7 +125,9 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
       ),
     );
 
+    // 🔥 UPDATE UI
     setState(() {
+      isEnrolled = true;
       studentsFuture = EnrollmentController.getEnrollmentsByClass(
         widget.kelasId,
       );
@@ -175,37 +198,48 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                               color: Color(0xFF6C4FD8),
                             ),
                           ),
+
+                          // 🔥 TOMBOL DINAMIS
                           ElevatedButton.icon(
-                            icon: const Icon(Icons.check),
-                            label: const Text("Daftar"),
+                            icon: Icon(
+                              isEnrolled ? Icons.check : Icons.person_add,
+                            ),
+                            label: Text(
+                              isEnrolled ? "Sudah Terdaftar" : "Daftar",
+                            ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF6C4FD8),
+                              backgroundColor: isEnrolled
+                                  ? Colors.grey
+                                  : const Color(0xFF6C4FD8),
                               foregroundColor: Colors.white,
                             ),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text("Daftar Kelas"),
-                                  content: Text(
-                                    "Daftar ke kelas ${kelas.namaKelas}?",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text("Batal"),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () async {
-                                        Navigator.pop(context);
-                                        await daftarKelas(kelas);
-                                      },
-                                      child: const Text("Daftar"),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                            onPressed: isEnrolled
+                                ? null
+                                : () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text("Daftar Kelas"),
+                                        content: Text(
+                                          "Daftar ke kelas ${kelas.namaKelas}?",
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: const Text("Batal"),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                              await daftarKelas(kelas);
+                                            },
+                                            child: const Text("Daftar"),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
                           ),
                         ],
                       ),
@@ -220,10 +254,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        kelas.deskripsi ?? "Tidak ada deskripsi",
-                        style: const TextStyle(color: Colors.black87),
-                      ),
+                      Text(kelas.deskripsi ?? "Tidak ada deskripsi"),
 
                       const SizedBox(height: 24),
 

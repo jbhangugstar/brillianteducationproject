@@ -48,7 +48,7 @@ class PreferenceHandler {
   // 2. FUNGSI AMBIL DATA (GETTERS)
   // ==========================================
 
-  // Perhatikan: Saya hilangkan 'static' agar konsisten menggunakan instance
+  // Saya hilangkan 'static' agar konsisten menggunakan instance
   Future<bool?> getIsLogin() async {
     return _preferences?.getBool(_isLogin);
   }

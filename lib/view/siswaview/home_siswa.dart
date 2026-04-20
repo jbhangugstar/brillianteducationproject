@@ -2,6 +2,7 @@ import 'package:brillianteducationproject/controller/kelas_controller.dart';
 import 'package:brillianteducationproject/models/kelas_model.dart';
 import 'package:brillianteducationproject/helper/image_helper.dart';
 import 'package:brillianteducationproject/helper/currency_helper.dart';
+import 'package:brillianteducationproject/view/siswaview/class_detail_screen.dart';
 
 import 'package:flutter/material.dart';
 
@@ -119,7 +120,7 @@ class _HomeSiswaScreenState extends State<HomeSiswaScreen> {
                         ),
                         const SizedBox(height: 6),
                         const Text(
-                          "Sesi 1-on-1 dengan tutor berpengalaman",
+                          "Sesi belajar Live dengan tutor berpengalaman",
                           style: TextStyle(color: Colors.white70),
                         ),
                         const SizedBox(height: 15),
@@ -132,7 +133,7 @@ class _HomeSiswaScreenState extends State<HomeSiswaScreen> {
                             ),
                           ),
                           onPressed: () {},
-                          child: const Text("Mulai Sekarang"),
+                          child: const Text("Coming Soon"),
                         ),
                       ],
                     ),
@@ -157,8 +158,9 @@ class _HomeSiswaScreenState extends State<HomeSiswaScreen> {
                         color: const Color(0xffEAD9FF),
                         onTap: () {
                           setState(() {
-                            _kelasFuture =
-                                KelasController.getKelasByKategori("Science");
+                            _kelasFuture = KelasController.getKelasByKategori(
+                              "Science",
+                            );
                           });
                         },
                       ),
@@ -168,8 +170,9 @@ class _HomeSiswaScreenState extends State<HomeSiswaScreen> {
                         color: const Color(0xffD9E7FF),
                         onTap: () {
                           setState(() {
-                            _kelasFuture =
-                                KelasController.getKelasByKategori("Languages");
+                            _kelasFuture = KelasController.getKelasByKategori(
+                              "Languages",
+                            );
                           });
                         },
                       ),
@@ -179,8 +182,9 @@ class _HomeSiswaScreenState extends State<HomeSiswaScreen> {
                         color: const Color(0xffD9FFE4),
                         onTap: () {
                           setState(() {
-                            _kelasFuture =
-                                KelasController.getKelasByKategori("Programming & Technology");
+                            _kelasFuture = KelasController.getKelasByKategori(
+                              "Programming & Technology",
+                            );
                           });
                         },
                       ),
@@ -235,10 +239,12 @@ class _HomeSiswaScreenState extends State<HomeSiswaScreen> {
 
                       return Column(
                         children: kelasList
-                            .map((kelas) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: KelasCard(kelas: kelas),
-                                ))
+                            .map(
+                              (kelas) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: KelasCard(kelas: kelas),
+                              ),
+                            )
                             .toList(),
                       );
                     },
@@ -293,10 +299,7 @@ class CategoryItem extends StatelessWidget {
 class KelasCard extends StatelessWidget {
   final Kelas kelas;
 
-  const KelasCard({
-    super.key,
-    required this.kelas,
-  });
+  const KelasCard({super.key, required this.kelas});
 
   @override
   Widget build(BuildContext context) {
@@ -364,6 +367,15 @@ class KelasCard extends StatelessWidget {
               ),
             ),
             onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ClassDetailScreen(
+                    kelasId: kelas.id!,
+                    namaKelas: kelas.namaKelas,
+                  ),
+                ),
+              );
               // Navigation to detail class logic
             },
             child: const Text(

@@ -113,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: emailController,
                     decoration: InputDecoration(
                       hintText: "Masukkan Email",
-                      labelText: "Email",
+                      // labelText: "Email",
                       prefixIcon: const Icon(Icons.email),
                       filled: true,
                       fillColor: Colors.white,

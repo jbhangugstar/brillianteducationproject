@@ -36,60 +36,76 @@ class RegisteroptionScreen extends StatelessWidget {
                 width: 800,
               ),
 
-              ElevatedButton(
-                onPressed: () {
-                  context.push(const RegisterSiswaScreen());
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white, // warna tombol
-                  foregroundColor: const Color.fromARGB(
-                    255,
-                    179,
-                    8,
-                    170,
-                  ), // warna teks
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // bikin melengkung
-                    side: const BorderSide(
-                      color: Color.fromARGB(
-                        255,
-                        179,
-                        8,
-                        170,
-                      ), // warna border
-                      width: 2, // tebal border
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.push(const RegisterSiswaScreen());
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white, // warna tombol
+                        foregroundColor: const Color.fromARGB(
+                          255,
+                          179,
+                          8,
+                          170,
+                        ), // warna teks
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            10,
+                          ), // bikin melengkung
+                          side: const BorderSide(
+                            color: Color.fromARGB(
+                              255,
+                              179,
+                              8,
+                              170,
+                            ), // warna border
+                            width: 2, // tebal border
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        "Daftar sebagai siswa",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
-                ),
-                child: const Text(
-                  "Daftar sebagai siswa",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                ],
               ),
 
               const SizedBox(height: 10),
 
-              ElevatedButton(
-                onPressed: () {
-                  context.push((const RegistertutorScreen()));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white, // warna tombol
-                  foregroundColor: Colors.deepPurple, // warna teks
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // bikin melengkung
-                    side: const BorderSide(
-                      color: Colors.deepPurple, // warna border
-                      width: 2, // tebal border
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.push((const RegistertutorScreen()));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white, // warna tombol
+                        foregroundColor: Colors.deepPurple, // warna teks
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            10,
+                          ), // bikin melengkung
+                          side: const BorderSide(
+                            color: Colors.deepPurple, // warna border
+                            width: 2, // tebal border
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        "Daftar sebagai tutor",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
-                ),
-                child: const Text(
-                  "Daftar sebagai tutor",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                ],
               ),
 
               const SizedBox(height: 50),
